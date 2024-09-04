@@ -222,7 +222,7 @@ module TSOS {
         // actual parameter list when this function is called, so I feel like we need it.
 
         public shellVer(args: string[]) {
-            _StdOut.putText(APP_NAME + " version " + APP_VERSION);
+            _StdOut.putText("TypeScript" + " version " + "5.5");
         }
 
         public shellHelp(args: string[]) {

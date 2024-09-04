@@ -83,16 +83,18 @@
 %----------------------------------------------------------------------------------------
 \section{What are the advantages and disadvantages of using the same system call interface for manipulating both files and devices}
 
-An $n$-element array of integer pairs: ($currentCount$, $predecessorSum$) will, once initialized in the preprocessing step,  support \textsc{Member}, \textsc{Less}, and \textsc{Range} operations as described in Section \ref{operations} in $O(1)$ (constant) time.
+The advantage of using the same system call interface for manipulating both files and devices is code simplicity as you don't need different code to handle different I/O operations. Another is flexibility because if devices are treated as files, it enables applications to work with different types of devices without anything needing to be rewritten. Disadvantages include the fact that there must be specialized handling because files and devices must be treated differently. Another disadvantage can be due to user error. With the mistaken assumption that devices behave exactly like files, developers may misuse system calls.
 
+%----------------------------------------------------------------------------------------
+%   start PROBLEM TWO
+%----------------------------------------------------------------------------------------
 
+\section{Would it be possible for the user to develop a new command interpreter using the system call interface provided by the operating system? How?}
 
+Yes, it is possible for the user to develop a new command interpreter using the system call interface provided by the operating system. It is possible by constructing a shell. To do this, users must utilize process control such as fork(), exec(), etc., file management including open() and close(), and communication mechanisms such as closeconnection() and readmessage().
 
 
 \lstset{numbers=left, numberstyle=\tiny, stepnumber=1, numbersep=5pt, basicstyle=\footnotesize\ttfamily}
-\begin{lstlisting}[frame=single, ]  
 
-}
-\end{lstlisting}
 
 \end{document}
