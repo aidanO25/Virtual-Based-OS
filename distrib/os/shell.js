@@ -45,6 +45,15 @@ var TSOS;
             // prompt <string>
             sc = new TSOS.ShellCommand(this.shellPrompt, "prompt", "<string> - Sets the prompt.");
             this.commandList[this.commandList.length] = sc;
+            // date and time
+            sc = new TSOS.ShellCommand(this.shellDate, "date", "<string> - Displays the current date and time.");
+            this.commandList[this.commandList.length] = sc;
+            // location (assuming you don't actually want us to implement like an api to get a user's actual location)
+            sc = new TSOS.ShellCommand(this.shellLocation, "location", "<string> - Displays a user's current location (made up");
+            this.commandList[this.commandList.length] = sc;
+            // fun facts
+            sc = new TSOS.ShellCommand(this.shellFact, "fact", "<string> - Gives the user a fun fact");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -167,7 +176,7 @@ var TSOS;
         // Although args is unused in some of these functions, it is always provided in the 
         // actual parameter list when this function is called, so I feel like we need it.
         shellVer(args) {
-            _StdOut.putText(APP_NAME + " version " + APP_VERSION);
+            _StdOut.putText("TypeScript" + " version " + "5.5");
         }
         shellHelp(args) {
             _StdOut.putText("Commands:");
@@ -194,6 +203,27 @@ var TSOS;
                         _StdOut.putText("Help displays a list of (hopefully) valid commands.");
                         break;
                     // TODO: Make descriptive MANual page entries for the the rest of the shell commands here.
+                    case "ver":
+                        _StdOut.putText("Ver displays the current version of the OS.");
+                        break;
+                    case "shutdown":
+                        _StdOut.putText("Shutdown turns off the OS, but leaves the underlying hardware simulation running.");
+                        break;
+                    case "cls":
+                        _StdOut.putText("Cls clears the screen and resets the cursor position.");
+                        break;
+                    case "man":
+                        _StdOut.putText("Man displays the manual page for the specified command.");
+                        break;
+                    case "trace":
+                        _StdOut.putText("Trace enables or disables OS tracing, which helps with debugging.");
+                        break;
+                    case "rot13":
+                        _StdOut.putText("Rot13 obfuscatesa given string by applying the ROT13 algorithm.");
+                        break;
+                    case "promt":
+                        _StdOut.putText("Promt changes the command line promt to the specified string.");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -243,6 +273,32 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: prompt <string>  Please supply a string.");
             }
+        }
+        // current date and time display
+        shellDate(args) {
+            const now = new Date();
+            _StdOut.putText("Cureent date and time: " + now.toLocaleString());
+        }
+        // user's location
+        shellLocation(args) {
+            const location = [
+                "The main frame.",
+                "The chocolate factory",
+                "The Cheese Cake Factory"
+            ];
+            const randomIndex = Math.floor(Math.random() * location.length); // had AI help with writing this randomization script
+            _StdOut.putText(location[randomIndex]);
+        }
+        // fun facts
+        shellFact(args) {
+            const facts = [
+                "Some tree species are able to taste. Trees can distiguish bud species by their saliva allowing them to either make " +
+                    "their leaves bitter so the bug leaves, or send a chemical signal through the air to alert that bug's prdators so they can come and eat them.",
+                "Soil is the worlds largest carbon sink.",
+                "In the study of quantum mechanics, if you were to magnify an atom to be the size of the observable universe, a string would be the size of a tree."
+            ];
+            const randomIndex = Math.floor(Math.random() * facts.length); // had AI help with writing this randomization script
+            _StdOut.putText(facts[randomIndex]);
         }
     }
     TSOS.Shell = Shell;
