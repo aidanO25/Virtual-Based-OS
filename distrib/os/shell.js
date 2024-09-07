@@ -54,6 +54,9 @@ var TSOS;
             // fun facts
             sc = new TSOS.ShellCommand(this.shellFact, "fact", "<string> - Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
+            // status message
+            sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Updates the current status");
+            this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -224,6 +227,9 @@ var TSOS;
                     case "promt":
                         _StdOut.putText("Promt changes the command line promt to the specified string.");
                         break;
+                    case "status":
+                        _StdOut.putText("Updates the current status of the OS");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -299,6 +305,17 @@ var TSOS;
             ];
             const randomIndex = Math.floor(Math.random() * facts.length); // had AI help with writing this randomization script
             _StdOut.putText(facts[randomIndex]);
+        }
+        // current status
+        shellStatus(args) {
+            if (args.length > 0) {
+                const statusMessage = args.join(" ");
+                window["updateStatus"](statusMessage);
+                _StdOut.putText("Status updated to: " + statusMessage);
+            }
+            else {
+                _StdOut.putText("Usage: status <string> - Please supply a status message.");
+            }
         }
     }
     TSOS.Shell = Shell;

@@ -33,6 +33,26 @@
    <!-- Uncomment the line below to enable GLaDOS testing. -->
    <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
 
+   <!-- Status bar to show date, time, and status -->
+   <script>
+      let statusMessage = "Content"; // global variable that allows the status to be changed based off of the shell command
+      function updateDateTime() 
+      {
+         const now = new Date();
+         const date = now.toLocaleDateString();
+         const time = now.toLocaleTimeString();
+         document.getElementById("statusBar").innerHTML = `Date: ${date} | Time: ${time} | Status: ${statusMessage}`;
+      }
+      // updates the status message if the shell command is executed
+      function updateStatus(message)
+      {
+         statusMessage = message;
+         updateDateTime();
+      }
+      // Update the time every second
+      setInterval(updateDateTime, 1000);
+   </script>
+
 </head>
 
 <body onload="onDocumentLoad()">
@@ -65,6 +85,11 @@
              value="Reset"
              tabindex="2"
              onclick="TSOS.Control.hostBtnReset_click(this);">
+   </div>
+
+   <!-- The actual status bar to be displayed -->
+   <div id="statusBar" style="margin: 10px; padding: 10px; background-color: lightgrey; font-weight: bold;">
+         Date: -- | Time: -- | Status: Content
    </div>
 
    <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">

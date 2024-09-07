@@ -91,6 +91,12 @@ module TSOS {
                                   "<string> - Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
 
+            // status message
+            sc = new ShellCommand(this.shellStatus, 
+                                  "status", 
+                                  "<string> - Updates the current status");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -274,6 +280,18 @@ module TSOS {
                     case "promt":
                         _StdOut.putText("Promt changes the command line promt to the specified string.");
                         break;
+                    case "date":
+                        _StdOut.putText("Date displays the current date and time.");
+                        break;
+                    case "location":
+                        _StdOut.putText("Location gives you your current location (made up)");
+                        break;
+                    case "fact":
+                        _StdOut.putText("Fact gives you one out of three listed fun facts.");
+                        break;
+                    case "status":
+                        _StdOut.putText("Status updates the current status of the OS");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -350,6 +368,20 @@ module TSOS {
             ];
             const randomIndex = Math.floor(Math.random() * facts.length); // had AI help with writing this randomization script
             _StdOut.putText(facts[randomIndex]);
+        }
+
+        // current status
+        public shellStatus(args: string[])
+        {
+            if(args.length > 0)
+            {
+                const statusMessage = args.join(" ");
+                window["updateStatus"](statusMessage); // needed some AI help with this part (specifically the window object)
+            }
+            else
+            {
+                _StdOut.putText("Usage: status <string> - Please supply a status message.");
+            }
         }
 
     }
