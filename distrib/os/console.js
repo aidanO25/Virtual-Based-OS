@@ -12,6 +12,9 @@ var TSOS;
         currentXPosition;
         currentYPosition;
         buffer;
+        // variables to store command history
+        commandHistory = [];
+        historyIndex = -1;
         constructor(currentFont = _DefaultFontFamily, currentFontSize = _DefaultFontSize, currentXPosition = 0, currentYPosition = _DefaultFontSize, buffer = "") {
             this.currentFont = currentFont;
             this.currentFontSize = currentFontSize;
@@ -36,6 +39,9 @@ var TSOS;
                 var chr = _KernelInputQueue.dequeue();
                 // Check to see if it's "special" (enter or ctrl-c) or "normal" (anything else that the keyboard device driver gave us).
                 if (chr === String.fromCharCode(13)) { // the Enter key
+                    // putting the previous command into the buffer if the arrow key is used
+                    this.commandHistory.push(this.buffer);
+                    this.historyIndex = this.commandHistory.length;
                     // The enter key marks the end of a console command, so ...
                     // ... tell the shell ...
                     _OsShell.handleInput(this.buffer);
@@ -49,6 +55,14 @@ var TSOS;
                 // tab completion
                 else if (chr === String.fromCharCode(9)) {
                     this.handleTabCompletion();
+                }
+                // up arrow to show previous command
+                else if (chr === 38) {
+                    this.showPreviousCommand();
+                }
+                // down arrow to show next command
+                else if (chr === 40) {
+                    this.showNextCommand();
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -115,6 +129,29 @@ var TSOS;
         clearLine() {
             this.currentXPosition = 0;
             _DrawingContext.clearRect(0, this.currentYPosition - this.currentFontSize, _Canvas.width, this.currentFontSize + _FontHeightMargin);
+        }
+        // displays the previous command 
+        showPreviousCommand() {
+            if (this.historyIndex > 0) { // chekcs to see if there is a previous command
+                this.historyIndex--;
+                this.buffer = this.commandHistory[this.historyIndex]; // gets the previous command
+                this.clearLine();
+                this.putText(this.buffer);
+            }
+        }
+        // displays the next command
+        showNextCommand() {
+            if (this.historyIndex < this.commandHistory.length - 1) { // checks if there is a next command
+                this.historyIndex++;
+                this.buffer = this.commandHistory[this.historyIndex]; // gets the next command 
+                this.clearLine();
+                this.putText(this.buffer);
+            }
+            else {
+                this.historyIndex = this.commandHistory.length;
+                this.buffer = "";
+                this.clearLine();
+            }
         }
     }
     TSOS.Console = Console;

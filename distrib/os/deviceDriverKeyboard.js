@@ -58,6 +58,10 @@ var TSOS;
             else if (keyCode === 9) {
                 _KernelInputQueue.enqueue(String.fromCharCode(9));
             }
+            // up arrow and down arrows
+            else if (keyCode === 38 || keyCode === 40) {
+                _KernelInputQueue.enqueue(keyCode);
+            }
             // Handle special characters
             else {
                 switch (keyCode) {
