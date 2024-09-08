@@ -383,6 +383,5 @@ module TSOS {
                 _StdOut.putText("Usage: status <string> - Please supply a status message.");
             }
         }
-
     }
 }

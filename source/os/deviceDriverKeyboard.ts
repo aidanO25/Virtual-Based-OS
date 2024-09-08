@@ -59,6 +59,11 @@ module TSOS {
             { 
                 _KernelInputQueue.enqueue(String.fromCharCode(8));
             }
+            // tab (for word completion)
+            else if (keyCode === 9) 
+                { 
+                    _KernelInputQueue.enqueue(String.fromCharCode(9));
+                }
             // Handle special characters
             else {
                 switch (keyCode) {

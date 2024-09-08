@@ -42,8 +42,13 @@ module TSOS {
                     // ... and reset our buffer.
                     this.buffer = "";
                 } 
+                // backspace handling
                 else if(chr === String.fromCharCode(8)) {
                     this.handleBackspace();
+                }
+                // tab completion
+                else if (chr === String.fromCharCode(9)) { 
+                    this.handleTabCompletion();
                 }
                 else {
                     // This is a "normal" character, so ...
@@ -98,6 +103,23 @@ module TSOS {
                 _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, offset, this.currentFontSize + _FontHeightMargin + 10);
                 this.buffer = this.buffer.slice(0, -1); // removing the last character
             }
+        }
+        // enabling tab completion
+        public handleTabCompletion(): void {
+            const commands = _OsShell.commandList.map(cmd => cmd.command); // this takes in the list of available shell commands. I had help with both this line and the one below to make a list of commands and filtering through them. See commit description
+            const matches = commands.filter(cmd => cmd.startsWith(this.buffer));
+            // checks if there is a command that matches the partically typed input and if so it adds it to the buffer
+            if (matches.length === 1) {
+                this.buffer = matches[0];
+                this.clearLine();
+                this.putText(this.buffer);
+            }
+        }
+
+        // clear line makes sure the command is displayed correctly, rather than just adding onto the current characters
+        public clearLine(): void {
+            this.currentXPosition = 0;
+            _DrawingContext.clearRect(0, this.currentYPosition - this.currentFontSize, _Canvas.width, this.currentFontSize + _FontHeightMargin);
         }
     }
  }

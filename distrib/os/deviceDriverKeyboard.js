@@ -50,8 +50,13 @@ var TSOS;
                 _Console.buffer += chr;
                 _Console.putText(chr);
             }
-            else if (keyCode === 8) { // Backspace
+            // backspace (delete)
+            else if (keyCode === 8) {
                 _KernelInputQueue.enqueue(String.fromCharCode(8));
+            }
+            // tab (for word completion)
+            else if (keyCode === 9) {
+                _KernelInputQueue.enqueue(String.fromCharCode(9));
             }
             // Handle special characters
             else {
