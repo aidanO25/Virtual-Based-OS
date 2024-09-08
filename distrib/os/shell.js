@@ -227,8 +227,17 @@ var TSOS;
                     case "promt":
                         _StdOut.putText("Promt changes the command line promt to the specified string.");
                         break;
+                    case "date":
+                        _StdOut.putText("Date displays the current date and time.");
+                        break;
+                    case "location":
+                        _StdOut.putText("Location gives you your current location (made up)");
+                        break;
+                    case "fact":
+                        _StdOut.putText("Fact gives you one out of three listed fun facts.");
+                        break;
                     case "status":
-                        _StdOut.putText("Updates the current status of the OS");
+                        _StdOut.putText("Status updates the current status of the OS");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -310,8 +319,7 @@ var TSOS;
         shellStatus(args) {
             if (args.length > 0) {
                 const statusMessage = args.join(" ");
-                window["updateStatus"](statusMessage);
-                _StdOut.putText("Status updated to: " + statusMessage);
+                window["updateStatus"](statusMessage); // needed some AI help with this part (specifically the window object)
             }
             else {
                 _StdOut.putText("Usage: status <string> - Please supply a status message.");

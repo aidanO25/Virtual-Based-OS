@@ -48,6 +48,53 @@ module TSOS {
                 chr = String.fromCharCode(keyCode);
                 _KernelInputQueue.enqueue(chr);
             }
+            else if ((keyCode >= 48 && keyCode <= 57) || keyCode === 32) {  // Digits or space
+                chr = String.fromCharCode(keyCode);
+                _Console.buffer += chr;
+                _Console.putText(chr);
+
+            } 
+            // Handle special characters
+            else {
+                switch (keyCode) {
+                    case 186: // semicolon
+                        chr = isShifted ? ':' : ';';
+                        break;
+                    case 187: // equals
+                        chr = isShifted ? '+' : '=';
+                        break;
+                    case 188: // comma
+                        chr = isShifted ? '<' : ',';
+                        break;
+                    case 189: // dash
+                        chr = isShifted ? '_' : '-';
+                        break;
+                    case 190: // period
+                        chr = isShifted ? '>' : '.';
+                        break;
+                    case 191: // slash
+                        chr = isShifted ? '?' : '/';
+                        break;
+                    case 219: // left bracket
+                        chr = isShifted ? '{' : '[';
+                        break;
+                    case 220: // backslash
+                        chr = isShifted ? '|' : '\\';
+                        break;
+                    case 221: // right bracket
+                        chr = isShifted ? '}' : ']';
+                        break;
+                    case 222: // quote
+                        chr = isShifted ? '"' : "'";
+                        break;
+                    default:
+                        chr = ''; // Ignore other key codes
+                        break;
+                }
+                if (chr) {
+                    _KernelInputQueue.enqueue(chr);
+                }
+            }
         }
     }
 }
