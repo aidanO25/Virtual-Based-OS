@@ -42,6 +42,9 @@ var TSOS;
                     // ... and reset our buffer.
                     this.buffer = "";
                 }
+                else if (chr === String.fromCharCode(8)) {
+                    this.handleBackspace();
+                }
                 else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
@@ -79,6 +82,16 @@ var TSOS;
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
             // TODO: Handle scrolling. (iProject 1)
+        }
+        handleBackspace() {
+            if (this.buffer.length > 0) {
+                var lastChar = this.buffer[this.buffer.length - 1];
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, lastChar);
+                this.currentXPosition -= offset;
+                // Clear a slightly larger area to account for descenders
+                _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, offset, this.currentFontSize + _FontHeightMargin + 10);
+                this.buffer = this.buffer.slice(0, -1);
+            }
         }
     }
     TSOS.Console = Console;

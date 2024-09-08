@@ -54,6 +54,11 @@ module TSOS {
                 _Console.putText(chr);
 
             } 
+            // backspace (delete)
+            else if (keyCode === 8) 
+            { 
+                _KernelInputQueue.enqueue(String.fromCharCode(8));
+            }
             // Handle special characters
             else {
                 switch (keyCode) {

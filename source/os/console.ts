@@ -41,7 +41,11 @@ module TSOS {
                     _OsShell.handleInput(this.buffer);
                     // ... and reset our buffer.
                     this.buffer = "";
-                } else {
+                } 
+                else if(chr === String.fromCharCode(8)) {
+                    this.handleBackspace();
+                }
+                else {
                     // This is a "normal" character, so ...
                     // ... draw it on the screen...
                     this.putText(chr);
@@ -81,6 +85,19 @@ module TSOS {
                                      _FontHeightMargin;
 
             // TODO: Handle scrolling. (iProject 1)
+        }
+        // enabling backspace
+        public handleBackspace(): void 
+        {
+            if (this.buffer.length > 0) // checking to see if there are even characters in the buffer
+            {
+                var lastChar = this.buffer[this.buffer.length - 1];
+                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, lastChar); // measuring the width of the last character, needed AI help with this idea
+                this.currentXPosition -= offset;
+                // clearing a slightly larger area to account for descenders (also got some AI help with this because for characters such as g for j, a small bit of the bottom portion wouldn't be deleted)
+                _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, offset, this.currentFontSize + _FontHeightMargin + 10);
+                this.buffer = this.buffer.slice(0, -1); // removing the last character
+            }
         }
     }
  }

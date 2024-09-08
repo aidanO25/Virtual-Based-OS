@@ -50,6 +50,9 @@ var TSOS;
                 _Console.buffer += chr;
                 _Console.putText(chr);
             }
+            else if (keyCode === 8) { // Backspace
+                _KernelInputQueue.enqueue(String.fromCharCode(8));
+            }
             // Handle special characters
             else {
                 switch (keyCode) {
