@@ -97,6 +97,12 @@ module TSOS {
                                   "<string> - Updates the current status");
             this.commandList[this.commandList.length] = sc;
 
+            // load (check if user input is valid assembly)
+            sc = new ShellCommand(this.shellLoad,
+                                  "load",
+                                  "Validates the usercode in the HTML5 text area");
+            this.commandList[this.commandList.length] = sc;
+
             // bsod
             /*
             sc = new ShellCommand(this.shellBsod, 
@@ -300,6 +306,9 @@ module TSOS {
                     case "status":
                         _StdOut.putText("Status updates the current status of the OS");
                         break;
+                    case "load":
+                        _StdOut.putText("Validates the user code in the HTML5 text area. Only hex digits and spaces are valid");
+                        break;
                     case "bsod":
                         _StdOut.putText("placeholder for image");
                         break;
@@ -394,5 +403,35 @@ module TSOS {
                 _StdOut.putText("Usage: status <string> - Please supply a status message.");
             }
         }
+
+        // load method for assemply
+        public shellLoad(args: string[]) {
+            // I had AI help with the setup with this line, specifically the incorporation of HTMLTextAreaElement. It represents a <textarea> element, mine being taProgramInput
+            // it allows you to access its properties and methods specific to text areas, which is necessay to access the .value property
+            const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value; 
+            let isValid = true;
+        
+            // loop to check each character of the taProgramInput
+            for (let i = 0; i < userInput.length; i++) {
+                const char = userInput[i];
+                
+                // checks if the char is a digit
+                if (!(char >= '0' && char <= '9') &&
+                    // checks if the character is an uppercase letter (A-F)
+                    !(char >= 'A' && char <= 'F') &&
+                    // Check if the char is a space
+                    !(char === ' ')) {
+                    isValid = false;
+                    break;
+                }
+            }
+            // outputs whether or not the input is valid
+            if (isValid) {
+                _StdOut.putText("Input is valid.");
+            } else {
+                _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces");
+            }
+        }
+
     }
 }
