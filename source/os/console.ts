@@ -104,7 +104,10 @@ module TSOS {
                                      _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                                      _FontHeightMargin;
 
-            // TODO: Handle scrolling. (iProject 1)
+            // checks if the current Y position goes past the canvas length
+            if(this.currentYPosition > _Canvas.height - _DefaultFontSize) {
+                this.handleScrolling();
+            }
         }
         // enabling backspace
         public handleBackspace(): void 
@@ -159,6 +162,13 @@ module TSOS {
                 this.buffer = "";
                 this.clearLine();
             }
+        }
+
+        private handleScrolling(): void {
+            const imageData = _DrawingContext.getImageData(0,_DefaultFontSize + _FontHeightMargin, _Canvas.width, _Canvas.height - (_DefaultFontSize + _FontHeightMargin));
+            this.clearScreen();
+            _DrawingContext.putImageData(imageData, 0, 0); // putts the image data back at the top with it moved up one line
+            this.currentYPosition = _Canvas.height - (_DefaultFontSize + _FontHeightMargin); // reset the current Y to the bottom of the canvas
         }
     }
  }

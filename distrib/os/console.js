@@ -100,7 +100,10 @@ var TSOS;
             this.currentYPosition += _DefaultFontSize +
                 _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
                 _FontHeightMargin;
-            // TODO: Handle scrolling. (iProject 1)
+            // checks if the current Y position goes past the canvas length
+            if (this.currentYPosition > _Canvas.height - _DefaultFontSize) {
+                this.handleScrolling();
+            }
         }
         // enabling backspace
         handleBackspace() {
@@ -152,6 +155,12 @@ var TSOS;
                 this.buffer = "";
                 this.clearLine();
             }
+        }
+        handleScrolling() {
+            const imageData = _DrawingContext.getImageData(0, _DefaultFontSize + _FontHeightMargin, _Canvas.width, _Canvas.height - (_DefaultFontSize + _FontHeightMargin));
+            this.clearScreen();
+            _DrawingContext.putImageData(imageData, 0, 0); // putts the image data back at the top with it moved up one line
+            this.currentYPosition = _Canvas.height - (_DefaultFontSize + _FontHeightMargin); // reset the current Y to the bottom of the canvas
         }
     }
     TSOS.Console = Console;

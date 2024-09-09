@@ -49,14 +49,21 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellDate, "date", "<string> - Displays the current date and time.");
             this.commandList[this.commandList.length] = sc;
             // location (assuming you don't actually want us to implement like an api to get a user's actual location)
-            sc = new TSOS.ShellCommand(this.shellLocation, "location", "<string> - Displays a user's current location (made up");
+            sc = new TSOS.ShellCommand(this.shellLocation, "location", "Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
             // fun facts
-            sc = new TSOS.ShellCommand(this.shellFact, "fact", "<string> - Gives the user a fun fact");
+            sc = new TSOS.ShellCommand(this.shellFact, "fact", "Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
             // status message
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Updates the current status");
             this.commandList[this.commandList.length] = sc;
+            // bsod
+            /*
+            sc = new ShellCommand(this.shellBsod,
+                                  "Bsod",
+                                  "placeholder for immage");
+            this.commandList[this.commandList.length] = sc;
+            */
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
             // Display the initial prompt.
@@ -238,6 +245,9 @@ var TSOS;
                         break;
                     case "status":
                         _StdOut.putText("Status updates the current status of the OS");
+                        break;
+                    case "bsod":
+                        _StdOut.putText("placeholder for image");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");

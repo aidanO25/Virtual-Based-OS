@@ -82,13 +82,13 @@ module TSOS {
             // location (assuming you don't actually want us to implement like an api to get a user's actual location)
             sc = new ShellCommand(this.shellLocation,
                                   "location",
-                                  "<string> - Displays a user's current location (made up");
+                                  "Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
 
             // fun facts
             sc = new ShellCommand(this.shellFact,
                                   "fact",
-                                  "<string> - Gives the user a fun fact");
+                                  "Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
 
             // status message
@@ -96,6 +96,14 @@ module TSOS {
                                   "status", 
                                   "<string> - Updates the current status");
             this.commandList[this.commandList.length] = sc;
+
+            // bsod
+            /*
+            sc = new ShellCommand(this.shellBsod, 
+                                  "Bsod", 
+                                  "placeholder for immage");
+            this.commandList[this.commandList.length] = sc;
+            */
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -291,6 +299,9 @@ module TSOS {
                         break;
                     case "status":
                         _StdOut.putText("Status updates the current status of the OS");
+                        break;
+                    case "bsod":
+                        _StdOut.putText("placeholder for image");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
