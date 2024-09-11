@@ -104,12 +104,10 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
             // bsod
-            /*
-            sc = new ShellCommand(this.shellBsod, 
-                                  "Bsod", 
-                                  "placeholder for immage");
+            sc = new ShellCommand(this.shellbsod, 
+                                  "bsod", 
+                                  "Call at your own risk");
             this.commandList[this.commandList.length] = sc;
-            */
 
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -310,7 +308,7 @@ module TSOS {
                         _StdOut.putText("Validates the user code in the HTML5 text area. Only hex digits and spaces are valid");
                         break;
                     case "bsod":
-                        _StdOut.putText("placeholder for image");
+                        _StdOut.putText("tests the screen of death");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -431,6 +429,16 @@ module TSOS {
             } else {
                 _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces");
             }
+        }
+
+        // BSOD command to test screen of death
+        public shellbsod(args: string[]) {
+            // variable to store my bsod
+            const img = new Image();
+            img.src = "/Users/aidanoleary/Desktop/OS-God_main/error.png";
+            img.onload =
+                _DrawingContext.clearScreen();
+                _DrawingContext.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
         }
 
     }

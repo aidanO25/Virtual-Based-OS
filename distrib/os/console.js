@@ -156,11 +156,23 @@ var TSOS;
                 this.clearLine();
             }
         }
+        // scrolls up. captures the image data, clears the screen, and re-pasts it at the top
         handleScrolling() {
+            // variable to save the image dta
             const imageData = _DrawingContext.getImageData(0, _DefaultFontSize + _FontHeightMargin, _Canvas.width, _Canvas.height - (_DefaultFontSize + _FontHeightMargin));
             this.clearScreen();
-            _DrawingContext.putImageData(imageData, 0, 0); // putts the image data back at the top with it moved up one line
+            // putts the image data back at the top with it moved up one line
+            _DrawingContext.putImageData(imageData, 0, 0);
+            // resets the current position
             this.currentYPosition = _Canvas.height - (_DefaultFontSize + _FontHeightMargin); // reset the current Y to the bottom of the canvas
+        }
+        shellbsod(args) {
+            const img = new Image();
+            img.src = 'error.png'; // Replace with the actual path to your image
+            img.onload = function () {
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height); // Clear the canvas
+                _DrawingContext.drawImage(img, 0, 0, _Canvas.width, _Canvas.height); // Draw the image on the canvas
+            };
         }
     }
     TSOS.Console = Console;
