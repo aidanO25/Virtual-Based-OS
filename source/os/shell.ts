@@ -432,13 +432,14 @@ module TSOS {
         }
 
         // BSOD command to test screen of death
-        public shellbsod(args: string[]) {
-            // variable to store my bsod
-            const img = new Image();
-            img.src = "/Users/aidanoleary/Desktop/OS-God_main/error.png";
-            img.onload =
-                _DrawingContext.clearScreen();
-                _DrawingContext.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
+        public shellbsod(args: string[]): void {
+            const bsodImage = new Image(); // object for our bsod image
+            bsodImage.src = "error.png"; // image path
+            // once the iage is loaded it's presented onto the canvas
+            bsodImage.onload = () => {
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+                _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
+            };
         }
 
     }
