@@ -1,4 +1,7 @@
-// this is the memory accessor
+/*
+This is my memory accessor class. The importance of it is to provide access to the system memory
+It talked with the memory class to read from and write to specific memory addresses
+*/
 var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
@@ -6,7 +9,7 @@ var TSOS;
         constructor(memory) {
             this.memory = memory;
         } // initializing memory and allows for this class to "talk" with the memory class
-        // reading a byte from a specific memory address
+        // read a byte from a specific memory address
         read(address) {
             if (address >= 0 && address < this.memory.size) {
                 return this.memory.getByte(address);

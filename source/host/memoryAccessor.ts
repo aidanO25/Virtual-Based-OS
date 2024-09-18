@@ -1,4 +1,7 @@
-// this is the memory accessor
+/*
+This is my memory accessor class. The importance of it is to provide access to the system memory
+It talked with the memory class to read from and write to specific memory addresses
+*/
 
 module TSOS
 {
@@ -6,7 +9,7 @@ module TSOS
     {
         constructor(public memory: Memory) {} // initializing memory and allows for this class to "talk" with the memory class
 
-        // reading a byte from a specific memory address
+        // read a byte from a specific memory address
         public read(address: number): number
         {
             if(address >= 0 && address < this.memory.size)

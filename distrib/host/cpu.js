@@ -19,14 +19,18 @@ var TSOS;
         Yreg;
         Zflag;
         memoryAccessor;
+        pcb;
         isExecuting;
-        constructor(PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, memoryAccessor = null, isExecuting = false) {
+        constructor(PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, memoryAccessor = null, // reference to MemoryAccessor
+        pcb = null, // reference to the CURRENT PCB 
+        isExecuting = false) {
             this.PC = PC;
             this.Acc = Acc;
             this.Xreg = Xreg;
             this.Yreg = Yreg;
             this.Zflag = Zflag;
             this.memoryAccessor = memoryAccessor;
+            this.pcb = pcb;
             this.isExecuting = isExecuting;
         }
         init() {
@@ -37,6 +41,27 @@ var TSOS;
             this.Zflag = 0;
             this.isExecuting = false;
         }
+        // starts executing a process
+        loadPCB(pcb) {
+            // loading the pCB values into the CPU
+            this.pcb = pcb;
+            this.PC = pcb.PC;
+            this.Acc = pcb.ACC;
+            this.Xreg = pcb.Xreg;
+            this.Yreg = pcb.Yreg;
+            this.Zflag = pcb.Zflag;
+            this.isExecuting = true;
+        }
+        // saves the current state of the CPU back into the PCB
+        savePCB() {
+            if (this.pcb) {
+                this.pcb.PC = this.PC;
+                this.pcb.ACC = this.Acc;
+                this.pcb.Xreg = this.Xreg;
+                this.pcb.Yreg = this.Yreg;
+                this.pcb.Zflag = this.Zflag;
+            }
+        }
         cycle() {
             _Kernel.krnTrace('CPU cycle');
             // ensures that the memoryAccessor is properly initialized before trying to access it
@@ -46,6 +71,8 @@ var TSOS;
                     const instruction = this.memoryAccessor.read(this.PC); // fetches the instruction from memory 
                     this.executeInstruction(instruction); // decodes, then executes the instruction
                     this.PC++; // increases the program counter
+                    // after executing, save the current CPU state back to the PCB
+                    this.savePCB();
                 }
                 catch (error) {
                     console.error(`Error during CPU cycle: ${error.message}`); // shows what the error is
