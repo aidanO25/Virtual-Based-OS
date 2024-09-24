@@ -93,16 +93,110 @@
             // method for executing
             private executeInstruction(instruction: number): void {
                 switch (instruction) {
+                    // this is the 6502 tsiraM instruction set
                     case 0xA9: // load the accumulator
-                        const value = this.memoryAccessor.read(this.PC + 1);
-                        this.Acc = value;
+                        this.Acc = this.memoryAccessor.read(this.PC + 1);
                         this.PC++;
                         break;
-                    // add more instructions
-                    default:
-                        console.error(`Unknown instruction: ${instruction.toString(16)}`);
+
+                    case 0xAD: // load the accumulator from memory
+                        const addr = this.memoryAccessor.read(this.PC + 1);
+                        this.Acc = this.memoryAccessor.read(addr);
+                        this.PC++;
+                        break;
+                    
+                    case 0x8D: //store the accumulator in memory 
+                        const storeAddr = this.memoryAccessor.read(this.PC + 1);
+                        this.PC++;
+                        break;
+                    
+                    case 0x8A: //transfer x to teh accumulator
+                        this.Acc = this.Xreg;
+                        break;
+                    
+                    case 0x98: //transfer y to accumulator
+                        this.Acc = this.Yreg;
+                        break;
+                    
+                    case 0x6D: // add with carry
+                        const adcAddr = this.memoryAccessor.read(this.PC + 1);
+                        this.Acc += this.memoryAccessor.read(adcAddr);
+                        this.PC++;
+                        break;
+
+                    case 0xA2: //  load x with a constant
+                        this.Xreg = this.memoryAccessor.read(this.PC + 1);
+                        this.PC++;
+                        break;
+
+                    case 0xAE: // load x from memory
+                        const xAddr = this.memoryAccessor.read(this.PC + 1)
+                        this.Xreg = this.memoryAccessor.read(xAddr);
+                        this.PC++;
+                        break;
+                    
+                    case 0xAA: // transfer accumulator to x
+                        this.Xreg = this.Acc;
+                        this.PC++;
+                        break;
+
+                    case 0xA0: // load y with a constant
+                        this.Yreg = this.memoryAccessor.read(this.PC + 1);
+                        this.PC++
+                        break;
+
+                    case 0xAC: // load y from memory
+                        const yAddr = this.memoryAccessor.read(this.PC + 1);
+                        this.Yreg = this.memoryAccessor.read(yAddr);
+                        this.PC++;
+                        break;
+
+                    case 0xA8: // transfer th accumulator to y
+                        this.Yreg = this.Acc;
+                        this.PC++;
+                        break;
+
+                    case 0xEA: // no operation
+                        this.PC++; // ID RATHER NOT ETERNALLY LOOP
+                        break;
+
+                    case 0x00: // break
                         this.isExecuting = false;
                         break;
+
+                    case 0xEC: // compares a byte in memory to x
+                        const cmpAddr = this.memoryAccessor.read(this.PC + 1);
+                        const cmpValue = this.memoryAccessor.read(cmpAddr);
+                        this.Zflag = (this.Yreg === cmpValue) ? 1 : 0; 
+                        this.PC++;
+                        break;
+
+                    case 0xD0: // branch if Z flag is 0
+                        const branchAddr = this.memoryAccessor.read(this.PC + 1);
+                        if(this.Zflag === 0 )
+                        {
+                            this.PC = branchAddr;
+                        }
+                        else
+                        {
+                            this.PC++;
+                        }
+                        break;
+
+                    case 0xEE: // incrememnt memory
+                        const incAddr = this.memoryAccessor.read(this.PC + 1);
+                        let value = this.memoryAccessor.read(incAddr);
+                        value++;
+                        this.memoryAccessor.write(incAddr, value);
+                        this.PC++;
+                        break;
+
+                    default:
+                        console.error(`Unknown instruction: ${instruction.toString(16)}`);
+                        this.isExecuting = false; // Stop execution on unknown instruction
+                        break;
+
+    
                 }
             }    
         }
