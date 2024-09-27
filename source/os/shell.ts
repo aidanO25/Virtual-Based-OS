@@ -10,6 +10,7 @@
 // TODO: Write a base class / prototype for system services and let Shell inherit from it.
 
 module TSOS {
+    
     export class Shell {
         // Properties
         public promptStr = ">";
@@ -402,44 +403,69 @@ module TSOS {
             }
         }
 
-        // load method for assemply
-        public shellLoad(args: string[]) {
-            // I had AI help with the setup with this line, specifically the incorporation of HTMLTextAreaElement. It represents a <textarea> element, mine being taProgramInput
-            // it allows you to access its properties and methods specific to text areas, which is necessay to access the .value property
-            const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value; 
-            let isValid = true;
-        
-            // loop to check each character of the taProgramInput
-            for (let i = 0; i < userInput.length; i++) {
-                const char = userInput[i];
-                
-                // checks if the char is a digit
-                if (!(char >= '0' && char <= '9') &&
-                    // checks if the character is an uppercase letter (A-F)
-                    !(char >= 'A' && char <= 'F') &&
-                    // Check if the char is a space
-                    !(char === ' ')) {
-                    isValid = false;
-                    break;
+        // load method to load a program into memory
+        public shellLoad() 
+        {
+            const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim(); // getting the user input from the program input section
+            let isValid = true; // "flag" for lack of a better term to ensure the input text, if any, is valid. Should I originally set this to false and then true when it's valid?
+            let program: number[] = []; // variable to store the parsed hexadecimal opcodes
+
+            // ensures ther is an imput, if not, isvalid is false
+            if (userInput.trim().length === 0) {
+                _StdOut.putText("No program input."); // output so the user knows they must enter a program
+                isValid = false;
+            }
+            else
+            {
+            // Validate the input and parse into hex bytes
+            for (let i = 0; i < userInput.length; i += 2) 
+                {
+                    const firstChar = userInput[i];
+                    const secondChar = userInput[i + 1];
+                    
+                    // Validate that both chars are hex digits
+                    if (!((firstChar >= '0' && firstChar <= '9') || (firstChar.toUpperCase() >= 'A' && firstChar.toUpperCase() <= 'F'))
+                        || !((secondChar >= '0' && secondChar <= '9') || (secondChar.toUpperCase() >= 'A' && secondChar.toUpperCase() <= 'F'))) {
+                        isValid = false;
+                        break;
+                    }
+            
+                    // combine the two chars into a hex byte and parse it as a number. This I had AI help with the idea and the implementation. I can give you more sepcific information if need be
+                    const hexByte = firstChar + secondChar;
+                    program.push(parseInt(hexByte, 16));
+                }
+            
+                // if the user input is valid, load the program into memory
+                if (isValid) 
+                {
+                    // loads the program into memory using MemoryManager
+                    const pid = _MemoryManager.loadProgram(program);
+            
+                    // displays the PID of the loaded program. yes this does increment as more programs are loaded
+                    _StdOut.putText(`Program loaded with PID: ${pid}`);
+                } 
+                else 
+                {
+                    // otherwise output the requirements for an input
+                    _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces");
                 }
             }
-            // outputs whether or not the input is valid
-            if (isValid) {
-                _StdOut.putText("Input is valid.");
-            } else {
-                _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces");
-            }
         }
 
-        // BSOD command to test screen of death
-        public shellbsod(args: string[]) {
-            // variable to store my bsod
-            const img = new Image();
-            img.src = "/Users/aidanoleary/Desktop/OS-God_main/error.png";
-            img.onload =
-                _DrawingContext.clearScreen();
-                _DrawingContext.drawImage(img, 0, 0, _Canvas.width, _Canvas.height);
+        /*
+        BSOD command to test screen of death. As you can see this changed from what was previously there. 
+        it is still fixed, however my previous commit put this back to what i originally had (bsod would not display) 
+        because I screwed this file up so bad that i had to go bck into github and copy and paste the last time it was working (classic)
+        */
+        public shellbsod(): void 
+        {
+            const bsodImage = new Image(); // object for our bsod image
+            bsodImage.src = "error.png"; // image path
+            // once the iage is loaded it's presented onto the canvas
+            bsodImage.onload = () => {
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+                _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
+            };
         }
-
     }
 }

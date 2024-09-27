@@ -6,6 +6,9 @@
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
+var _Memory;
+var _MemoryAccessor;
+var _MemoryManager;
 var TSOS;
 (function (TSOS) {
     class Kernel {
@@ -14,6 +17,14 @@ var TSOS;
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            // initialize global memory and manager
+            this.krnTrace("Starting memory initialization");
+            _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
+            this.krnTrace("finished initialization, creating MemoryAccessor");
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory); // Create MemoryAccessor to manage memory
+            this.krnTrace("Finished creation, moving to memory manager initialization");
+            _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
+            this.krnTrace("Memory setup complete");
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.

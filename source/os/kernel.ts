@@ -7,7 +7,14 @@
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
 
+// initialization of the memory system alowing other classes to access them
+var _Memory: TSOS.Memory;
+var _MemoryAccessor: TSOS.MemoryAccessor;
+var _MemoryManager: TSOS.MemoryManager;
+
 module TSOS {
+
+    
 
     export class Kernel {
         //
@@ -15,6 +22,16 @@ module TSOS {
         //
         public krnBootstrap() {      // Page 8. {
             Control.hostLog("bootstrap", "host");  // Use hostLog because we ALWAYS want this, even if _Trace is off.
+
+            // memory setup (I included some debugging/a display that memory is being initialized during boostrap)
+            this.krnTrace("Starting memory initialization");
+            _Memory = new TSOS.Memory(256);  // Initialize memory with 256 bytes
+            this.krnTrace("finished initialization, creating MemoryAccessor");
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory);  // Create MemoryAccessor to manage memory
+            this.krnTrace("Finished creation, moving to memory manager initialization");
+            _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
+            this.krnTrace("Memory setup complete");
+
 
             // Initialize our global queues.
             _KernelInterruptQueue = new Queue();  // A (currently) non-priority queue for interrupt requests (IRQs).
