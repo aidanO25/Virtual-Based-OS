@@ -88,6 +88,13 @@ var TSOS;
             // The easiest and most thorough way to do this is to reload (not refresh) the document.
             location.reload();
         }
+        static updateCpuStatus() {
+            document.getElementById("cpuPC").innerText = _CPU.PC.toString();
+            document.getElementById("cpuACC").innerText = _CPU.Acc.toString();
+            document.getElementById("cpuX").innerText = _CPU.Xreg.toString();
+            document.getElementById("cpuY").innerText = _CPU.Yreg.toString();
+            document.getElementById("cpuZ").innerText = _CPU.Zflag.toString();
+        }
     }
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));

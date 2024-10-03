@@ -73,8 +73,9 @@ var TSOS;
                 this.executeInstruction(instruction);
                 // debug, can get rid of this and should for final commit
                 _StdOut.putText(`Executed: ${instruction.toString(16).toUpperCase()}`);
-                _StdOut.putText(`| Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
+                _StdOut.putText(`| PC: ${this.PC} | Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
                 _StdOut.advanceLine();
+                TSOS.Control.updateCpuStatus();
                 // saves the current state of the pcb
                 this.savePCB();
             }

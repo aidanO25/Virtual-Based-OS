@@ -106,6 +106,27 @@
       </canvas>
    </div>
 
+   <!-- displays the cpu state -->
+   <div id="divCpuDisplay" style="margin-left:520px; margin-top:20px;">
+      <label>CPU Display</label>
+      <table border="1" style="border-collapse: collapse; text-align: center; background-color: white;">
+         <tr>
+            <th>PC</th>
+            <th>ACC</th>
+            <th>X Reg</th>
+            <th>Y Reg</th>
+            <th>Zflag</th>
+         </tr>
+         <tr>
+            <td id="cpuPC">0</td>
+            <td id="cpuACC">0</td>
+            <td id="cpuX">0</td>
+            <td id="cpuY">0</td>
+            <td id="cpuZ">0</td>
+         </tr>
+      </table>
+   </div>
+
    <div id="divLog" style="margin-left:520px;">
       <label>
          Host Log
