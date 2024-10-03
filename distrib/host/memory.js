@@ -4,7 +4,7 @@ var TSOS;
     class Memory {
         memoryArray; // Array representing the memory space
         size;
-        constructor(size = 256) {
+        constructor(size = 768) {
             this.size = size; // duh
             this.memoryArray = new Array(this.size).fill(0); // im not sure what brain fart i was having, but this is not the initialization of memory
         }

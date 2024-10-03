@@ -6,9 +6,12 @@
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
+// initialization of the memory system alowing other classes to access them
+// I see there is a globals.ts file, and I could probably put it there, but i was having problems when I trid the first time, ill try and figure that out next push
 var _Memory;
 var _MemoryAccessor;
 var _MemoryManager;
+var _CPU;
 var TSOS;
 (function (TSOS) {
     class Kernel {
@@ -17,7 +20,7 @@ var TSOS;
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
-            // initialize global memory and manager
+            // memory setup (I included some debugging/a display that memory is being initialized during boostrap)
             this.krnTrace("Starting memory initialization");
             _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
             this.krnTrace("finished initialization, creating MemoryAccessor");
@@ -25,6 +28,9 @@ var TSOS;
             this.krnTrace("Finished creation, moving to memory manager initialization");
             _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
             this.krnTrace("Memory setup complete");
+            this.krnTrace("Initializing CPU.");
+            _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
+            this.krnTrace("CPU initialized.");
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
@@ -156,6 +162,18 @@ var TSOS;
                 else {
                     TSOS.Control.hostLog(msg, "OS");
                 }
+            }
+        }
+        krnRunProcess(pid) {
+            // gets the PCB for the given PID from the MemoryManager
+            let pcb = _MemoryManager.getPCB(pid);
+            if (pcb) {
+                this.krnTrace(`Running program with PID: ${pid}`);
+                _CPU.loadPCB(pcb); // Load the PCB into the CPU
+                _CPU.isExecuting = true; // Start execution
+            }
+            else {
+                this.krnTrace(`No program found with PID: ${pid}`);
             }
         }
         krnTrapError(msg) {

@@ -25,7 +25,7 @@ module TSOS {
             // making sure there is enough space in memory (idk if this is necessary but I'm sure a good thing to have)
             if(limit > this.memoryAccessor.memory.size)
             {
-                throw new Error("Program exceeds memory size");
+                _StdOut.putText("Program exceeds memory size");
             }
 
             // loads the program into memory
@@ -35,7 +35,7 @@ module TSOS {
             }
 
             // creates a new PCB for the process
-            const pcb = new PCB(this.nextPID++, base, limit);
+            const pcb = new TSOS.PCB(this.nextPID++, base, limit);
             this.pcbs.push(pcb); // ads the pcb to the list
 
             return pcb.PID; // returns the process ID

@@ -20,7 +20,7 @@ var TSOS;
             const limit = program.length; // limit is the program size
             // making sure there is enough space in memory (idk if this is necessary but I'm sure a good thing to have)
             if (limit > this.memoryAccessor.memory.size) {
-                throw new Error("Program exceeds memory size");
+                _StdOut.putText("Program exceeds memory size");
             }
             // loads the program into memory
             for (let i = 0; i < program.length; i++) {

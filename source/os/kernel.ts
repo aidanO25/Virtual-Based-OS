@@ -8,9 +8,11 @@
      ------------ */
 
 // initialization of the memory system alowing other classes to access them
+// I see there is a globals.ts file, and I could probably put it there, but i was having problems when I trid the first time, ill try and figure that out next push
 var _Memory: TSOS.Memory;
 var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager: TSOS.MemoryManager;
+var _CPU: TSOS.Cpu;
 
 module TSOS {
 
@@ -31,6 +33,10 @@ module TSOS {
             this.krnTrace("Finished creation, moving to memory manager initialization");
             _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
             this.krnTrace("Memory setup complete");
+
+            this.krnTrace("Initializing CPU.");
+            _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
+            this.krnTrace("CPU initialized.");
 
 
             // Initialize our global queues.
@@ -182,6 +188,23 @@ module TSOS {
                     Control.hostLog(msg, "OS");
                 }
              }
+        }
+
+
+        public krnRunProcess(pid: number) 
+        {
+            // gets the PCB for the given PID from the MemoryManager
+            let pcb = _MemoryManager.getPCB(pid);
+            if (pcb) 
+            {
+                this.krnTrace(`Running program with PID: ${pid}`);
+                _CPU.loadPCB(pcb);  // Load the PCB into the CPU
+                _CPU.isExecuting = true;  // Start execution
+            } 
+            else 
+            {
+                this.krnTrace(`No program found with PID: ${pid}`);
+            }
         }
 
         public krnTrapError(msg) {

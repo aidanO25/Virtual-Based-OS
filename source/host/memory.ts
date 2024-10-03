@@ -6,7 +6,7 @@ module TSOS
         public memoryArray: number[]; // Array representing the memory space
         public size: number;
 
-        constructor(size: number = 256) // I believe this should be the size. I could be wrong. I forget what was said in class. I think there were two ways you suggested doing it
+        constructor(size: number = 768) // I believe this should be the size. I could be wrong. I forget what was said in class. I think there were two ways you suggested doing it
         {
             this.size = size; // duh
             this.memoryArray = new Array(this.size).fill(0); // im not sure what brain fart i was having, but this is not the initialization of memory

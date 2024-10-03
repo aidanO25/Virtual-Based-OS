@@ -62,114 +62,137 @@ var TSOS;
                 this.pcb.Zflag = this.Zflag;
             }
         }
+        // this allows the cpu to fetch, decond, and execute
         cycle() {
             _Kernel.krnTrace('CPU cycle');
-            // ensures that the memoryAccessor is properly initialized before trying to access it
-            // I had AI help with the structure of this becaues it gave the idea to set up error handling because of issues with reading using the memoryAccessor
-            if (this.memoryAccessor) {
-                try {
-                    const instruction = this.memoryAccessor.read(this.PC); // fetches the instruction from memory 
-                    this.executeInstruction(instruction); // decodes, then executes the instruction
-                    this.PC++; // increases the program counter
-                    // after executing, save the current CPU state back to the PCB
-                    this.savePCB();
-                }
-                catch (error) {
-                    console.error(`Error during CPU cycle: ${error.message}`); // shows what the error is
-                    this.isExecuting = false; // stops executing on the erorr
-                }
-            }
-            else {
-                console.error("MemoryAccessor is not initialized.");
-                this.isExecuting = false;
+            // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
+            if (this.memoryAccessor && this.isExecuting) {
+                // fetch
+                const instruction = this.memoryAccessor.read(this.PC);
+                // decode and execute
+                this.executeInstruction(instruction);
+                // debug, can get rid of this and should for final commit
+                _StdOut.putText(`Executed: ${instruction.toString(16).toUpperCase()}`);
+                _StdOut.putText(`| Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
+                _StdOut.advanceLine();
+                // saves the current state of the pcb
+                this.savePCB();
             }
         }
-        // method for executing
+        // these are the instructions from the 6502alan Machine language Instruction Set
         executeInstruction(instruction) {
             switch (instruction) {
-                // this is the 6502 tsiraM instruction set
-                case 0xA9: // load the accumulator
-                    this.Acc = this.memoryAccessor.read(this.PC + 1);
+                case 0xA9: //  load the accumulator with a constant
+                    this.PC++; // move to the operand (i mean i guess i could just put this.pc++ in the cycle, but i think it's ok like this)
+                    this.Acc = this.memoryAccessor.read(this.PC); // loads the accumulator with a constant
                     this.PC++;
                     break;
                 case 0xAD: // load the accumulator from memory
-                    const addr = this.memoryAccessor.read(this.PC + 1);
-                    this.Acc = this.memoryAccessor.read(addr);
+                    this.PC++; // increments the pc to get the low byte of the mem address
+                    const lowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++; // increments the pc to get the high byte of the memory address
+                    const highByte = this.memoryAccessor.read(this.PC);
+                    const address = (highByte << 8) | lowByte; // loads the value at the memory addrss into the accumulator
+                    this.Acc = this.memoryAccessor.read(address);
                     this.PC++;
                     break;
-                case 0x8D: //store the accumulator in memory 
-                    const storeAddr = this.memoryAccessor.read(this.PC + 1);
+                case 0x8D: // stores the accumulator in memory
+                    this.PC++; // incrementing the pc to get the low byte of mem address
+                    const storeLowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++; // increments the pc to get the high byte of mem address
+                    const storeHighByte = this.memoryAccessor.read(this.PC);
+                    const storeAddress = (storeHighByte << 8) | storeLowByte; // combines the low and high bytes to form the full mem address
+                    this.memoryAccessor.write(storeAddress, this.Acc); // stores the accumulators value at the specified memory address
                     this.PC++;
-                    break;
-                case 0x8A: //transfer x to teh accumulator
-                    this.Acc = this.Xreg;
-                    break;
-                case 0x98: //transfer y to accumulator
-                    this.Acc = this.Yreg;
                     break;
                 case 0x6D: // add with carry
-                    const adcAddr = this.memoryAccessor.read(this.PC + 1);
-                    this.Acc += this.memoryAccessor.read(adcAddr);
+                    this.PC++; // increment the progam counter to get low byte of the mem address
+                    const addLowByte = this.memoryAccessor.read(this.PC); // 
+                    this.PC++; // increment the program counter to get the high byte of the mem address
+                    const addHighByte = this.memoryAccessor.read(this.PC);
+                    const addAddress = (addHighByte << 8) | addLowByte; // rad the value at the desired address and add it to the accumulator
+                    const value = this.memoryAccessor.read(addAddress); // reads the value at the computed addres and adds it to the accumulator
+                    this.Acc += value;
                     this.PC++;
                     break;
-                case 0xA2: //  load x with a constant
-                    this.Xreg = this.memoryAccessor.read(this.PC + 1);
+                case 0xA2: // load the X register with a constant
+                    this.PC++; // points to the operand
+                    this.Xreg = this.memoryAccessor.read(this.PC); // loads the constant into the x reg
                     this.PC++;
                     break;
-                case 0xAE: // load x from memory
-                    const xAddr = this.memoryAccessor.read(this.PC + 1);
-                    this.Xreg = this.memoryAccessor.read(xAddr);
+                case 0xAE: // load the X register from memory
+                    this.PC++; // incrementing to get low byte of memory address
+                    const xLowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++; // incrementing to get the high byte of memory address
+                    const xHighByte = this.memoryAccessor.read(this.PC);
+                    const xAddress = (xHighByte << 8) | xLowByte; // combines the low and high bight to form the full memory add
+                    this.Xreg = this.memoryAccessor.read(xAddress); // leads the value from memry into the x register
                     this.PC++;
                     break;
-                case 0xAA: // transfer accumulator to x
-                    this.Xreg = this.Acc;
+                case 0xA0: // load the Y register with a constant
+                    this.PC++; // points to the operand
+                    this.Yreg = this.memoryAccessor.read(this.PC); // load the constant into the y register
                     this.PC++;
                     break;
-                case 0xA0: // load y with a constant
-                    this.Yreg = this.memoryAccessor.read(this.PC + 1);
+                case 0xAC: // load the Y register from memory
+                    this.PC++; // incrementing to get the low byte of memory address
+                    const yLowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++; // incrementing to get the high byte of memory
+                    const yHighByte = this.memoryAccessor.read(this.PC);
+                    const yAddress = (yHighByte << 8) | yLowByte; // combines the low and high byte to form full mem address
+                    this.Yreg = this.memoryAccessor.read(yAddress); // load the value form memory into the y reg
                     this.PC++;
                     break;
-                case 0xAC: // load y from memory
-                    const yAddr = this.memoryAccessor.read(this.PC + 1);
-                    this.Yreg = this.memoryAccessor.read(yAddr);
-                    this.PC++;
+                case 0xEA: // no Operation
+                    this.PC++; // just in incrementing the program counter
                     break;
-                case 0xA8: // transfer th accumulator to y
-                    this.Yreg = this.Acc;
-                    this.PC++;
-                    break;
-                case 0xEA: // no operation
-                    this.PC++; // ID RATHER NOT ETERNALLY LOOP
-                    break;
-                case 0x00: // break
+                case 0x00: // break (System call) I assume we just stop executing and incement the program counter
                     this.isExecuting = false;
-                    break;
-                case 0xEC: // compares a byte in memory to x
-                    const cmpAddr = this.memoryAccessor.read(this.PC + 1);
-                    const cmpValue = this.memoryAccessor.read(cmpAddr);
-                    this.Zflag = (this.Yreg === cmpValue) ? 1 : 0;
                     this.PC++;
                     break;
-                case 0xD0: // branch if Z flag is 0
-                    const branchAddr = this.memoryAccessor.read(this.PC + 1);
+                case 0xEC: // compare a byte in memory to the X register
+                    this.PC++; // increment the pc to get the low byte of the mem address
+                    const cpxLowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++; // increment the pc to get the high byte of the mem address
+                    const cpxHighByte = this.memoryAccessor.read(this.PC);
+                    const cpxAddress = (cpxHighByte << 8) | cpxLowByte; // compaaring the value in memory with the x reg and setting the Z flag 
+                    const cpxValue = this.memoryAccessor.read(cpxAddress);
+                    this.Zflag = (this.Xreg === cpxValue) ? 1 : 0;
+                    this.PC++; // moves to the next operand
+                    break;
+                case 0xD0: // branch if Z flag is equal to 0
+                    this.PC++; // increments the pc counter to get the branch offset 
                     if (this.Zflag === 0) {
-                        this.PC = branchAddr;
+                        // if the z flag is -, add the branch offset to the pc
+                        const branchValue = this.memoryAccessor.read(this.PC);
+                        this.PC += branchValue; // adds the branch offset to the pc
                     }
                     else {
+                        // otherwise just skip the branch operand
                         this.PC++;
                     }
                     break;
-                case 0xEE: // incrememnt memory
-                    const incAddr = this.memoryAccessor.read(this.PC + 1);
-                    let value = this.memoryAccessor.read(incAddr);
-                    value++;
-                    this.memoryAccessor.write(incAddr, value);
+                case 0xEE: // increment the value of a byte
+                    this.PC++; // increments the pc to get the low byte of the memory add
+                    const incLowByte = this.memoryAccessor.read(this.PC);
+                    this.PC++;
+                    // increments the pc to get the high byte of the memory add
+                    const incHighByte = this.memoryAccessor.read(this.PC);
+                    //cobines the low and high byte to from the full memory address
+                    const incAddress = (incHighByte << 8) | incLowByte;
+                    let incValue = this.memoryAccessor.read(incAddress);
+                    incValue++;
+                    this.memoryAccessor.write(incAddress, incValue);
+                    // incfement the pc to move past the operand
                     this.PC++;
                     break;
-                default:
-                    console.error(`Unknown instruction: ${instruction.toString(16)}`);
-                    this.isExecuting = false; // Stop execution on unknown instruction
+                // ff goes here but am not going to put this in just yet because im trying to figure it out
+                // actively working on this
+                case 0xFF: // SYS - System Call
+                    _StdOut.putText("error"); // some better debugging can go here but for now im keeping it like this
                     break;
+                default:
+                    _StdOut.putText("error"); // deffinetly could put something better or debugging but that should come later
             }
         }
     }

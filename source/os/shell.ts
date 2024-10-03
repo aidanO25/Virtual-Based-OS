@@ -87,7 +87,7 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
             // fun facts
-            sc = new ShellCommand(this.shellFact,
+            sc = new ShellCommand(this.shellDisplayMemory,
                                   "fact",
                                   "Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
@@ -103,7 +103,18 @@ module TSOS {
                                   "load",
                                   "Validates the usercode in the HTML5 text area");
             this.commandList[this.commandList.length] = sc;
+            
+            // runs a program in memory 
+            sc = new ShellCommand(this.shellRun, 
+                                    "run", 
+                                    "<pid> - Runs the program with the given Process ID (PID).");
+            this.commandList[this.commandList.length] = sc;
 
+            sc = new ShellCommand(this.shellDisplayMemory, 
+                                    "display", 
+                                    "Displays the program in memory");
+            this.commandList[this.commandList.length] = sc;
+            
             // bsod
             sc = new ShellCommand(this.shellbsod, 
                                   "bsod", 
@@ -308,6 +319,12 @@ module TSOS {
                     case "load":
                         _StdOut.putText("Validates the user code in the HTML5 text area. Only hex digits and spaces are valid");
                         break;
+                    case "run":
+                        _StdOut.putText("Runs a program from memory based on its process ID (PID)");
+                        break;
+                    case "display":
+                        _StdOut.putText("Displays memory");
+                        break;
                     case "bsod":
                         _StdOut.putText("tests the screen of death");
                         break;
@@ -404,50 +421,60 @@ module TSOS {
         }
 
         // load method to load a program into memory
-        public shellLoad() 
-        {
-            const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim(); // getting the user input from the program input section
-            let isValid = true; // "flag" for lack of a better term to ensure the input text, if any, is valid. Should I originally set this to false and then true when it's valid?
-            let program: number[] = []; // variable to store the parsed hexadecimal opcodes
+        // load method to load a program into memory
+        public shellLoad() {
+            const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim();
+            let isValid = true;
+            let program: number[] = [];
 
-            // ensures ther is an imput, if not, isvalid is false
-            if (userInput.trim().length === 0) {
-                _StdOut.putText("No program input."); // output so the user knows they must enter a program
-                isValid = false;
-            }
-            else
+            // Ensure there is input
+            if (userInput.trim().length === 0) 
             {
-            // Validate the input and parse into hex bytes
-            for (let i = 0; i < userInput.length; i += 2) 
+                _StdOut.putText("No program input.");
+                isValid = false;
+            } 
+            else 
+            {
+                /* Remove all spaces from the input (I had AI help with how to do this, hence the scrabbledness of the code.)
+                 while scrambled, there is significance to the characters used. They include delimiters, a quanitifier meaning 
+                 there is one or more occerences of that characer (in our case its the ''), and a global flag which ensres it will
+                 uncover all occurences, not jsut the first one. 
+                */
+                const sanitizedInput = userInput.replace(/\s+/g, ''); 
+
+                // checks if the sanitized input length is even (each hex byte is two characters)
+                if (sanitizedInput.length % 2 !== 0) 
                 {
-                    const firstChar = userInput[i];
-                    const secondChar = userInput[i + 1];
-                    
-                    // Validate that both chars are hex digits
+                    _StdOut.putText("Error: Input length must be even (valid hex pairs).");
+                    isValid = false;
+                }
+
+                // validates and parses hex bytes
+                for (let i = 0; i < sanitizedInput.length; i += 2) 
+                {
+                    const firstChar = sanitizedInput[i];
+                    const secondChar = sanitizedInput[i + 1];
+
+                    // validate that both chars as hex digits (0-9, A-F, a-f)
                     if (!((firstChar >= '0' && firstChar <= '9') || (firstChar.toUpperCase() >= 'A' && firstChar.toUpperCase() <= 'F'))
                         || !((secondChar >= '0' && secondChar <= '9') || (secondChar.toUpperCase() >= 'A' && secondChar.toUpperCase() <= 'F'))) {
                         isValid = false;
                         break;
                     }
-            
-                    // combine the two chars into a hex byte and parse it as a number. This I had AI help with the idea and the implementation. I can give you more sepcific information if need be
+
                     const hexByte = firstChar + secondChar;
-                    program.push(parseInt(hexByte, 16));
+                    program.push(parseInt(hexByte, 16)); // converts the hex pair to a number and stores it in the program array
                 }
-            
-                // if the user input is valid, load the program into memory
+
                 if (isValid) 
                 {
-                    // loads the program into memory using MemoryManager
+                    // load the program into memory using MemoryManager
                     const pid = _MemoryManager.loadProgram(program);
-            
-                    // displays the PID of the loaded program. yes this does increment as more programs are loaded
                     _StdOut.putText(`Program loaded with PID: ${pid}`);
                 } 
                 else 
                 {
-                    // otherwise output the requirements for an input
-                    _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces");
+                    _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces are allowed.");
                 }
             }
         }
@@ -466,6 +493,41 @@ module TSOS {
                 _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
                 _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
             };
+        }
+
+        // This is the shell command to run a program from memory per its PID
+        public shellRun(args: string[]) 
+        {
+            if (args.length > 0) 
+            {
+                const pid = parseInt(args[0]);
+                // Fetch the PCB using the MemoryManager
+                const pcb = _MemoryManager.getPCB(pid);
+
+                if (pcb) {
+                    // Load the PCB into the CPU
+                    _CPU.loadPCB(pcb);
+                    // Start executing the program
+                    _CPU.isExecuting = true;
+                    _StdOut.putText(`Program with PID: ${pid} is now running.`);
+                } 
+                else 
+                {
+                    _StdOut.putText(`No program found with PID: ${pid}`);
+                }
+            } 
+            else 
+            {
+                _StdOut.putText("Usage: run <pid>");
+            }
+        }
+
+        public shellDisplayMemory(args: string[]) {
+            for (let i = 0; i < 15; i++) {
+                const value = _MemoryAccessor.read(i);
+                _StdOut.putText(`Address ${i.toString(16).toUpperCase()}: ${value.toString(16).toUpperCase()}`);
+                _StdOut.advanceLine();
+            }
         }
     }
 }
