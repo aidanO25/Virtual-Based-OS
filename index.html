@@ -91,7 +91,25 @@
              value="Reset"
              tabindex="2"
              onclick="TSOS.Control.hostBtnReset_click(this);">
-   </div>
+
+      <!-- single step toggle button -->
+      <input type="button"
+            id="btnToggleStep"
+            name="btnToggleStep"
+            class="normal_button"
+            value="Single Step: Off"
+            tabindex="3"
+            onclick="TSOS.Control.toggleSingleStep();">
+
+      <!-- step button (initially disabled) -->
+      <input type="button"
+            id="btnStep"
+            name="btnStep"
+            class="normal_button"
+            value="Step"
+            tabindex="4"
+            disabled="disabled"
+            onclick="TSOS.Control.singleStep();">
 
    <!-- The actual status bar to be displayed -->
    <div id="statusBar" style="margin: 10px; padding: 10px; background-color: lightgrey; font-weight: bold;">

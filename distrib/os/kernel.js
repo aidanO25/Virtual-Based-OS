@@ -20,14 +20,9 @@ var TSOS;
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
-            // memory setup (I included some debugging/a display that memory is being initialized during boostrap)
-            this.krnTrace("Starting memory initialization");
-            _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
-            this.krnTrace("finished initialization, creating MemoryAccessor");
-            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory); // Create MemoryAccessor to manage memory
-            this.krnTrace("Finished creation, moving to memory manager initialization");
+            this.krnTrace("initializing memory manager");
             _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
-            this.krnTrace("Memory setup complete");
+            this.krnTrace("manager setup complete");
             this.krnTrace("Initializing CPU.");
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
@@ -165,12 +160,17 @@ var TSOS;
             }
         }
         krnRunProcess(pid) {
-            // gets the PCB for the given PID from the MemoryManager
-            let pcb = _MemoryManager.getPCB(pid);
+            const pcb = _MemoryManager.getPCB(pid);
             if (pcb) {
                 this.krnTrace(`Running program with PID: ${pid}`);
-                _CPU.loadPCB(pcb); // Load the PCB into the CPU
-                _CPU.isExecuting = true; // Start execution
+                _CPU.loadPCB(pcb); // Load the process into the CPU
+                // Check if single-step mode is enabled
+                if (TSOS.Control.singleStepMode) {
+                    _CPU.isExecuting = false; // Prevent continuous execution in single-step mode
+                }
+                else {
+                    _CPU.isExecuting = true; // Start normal execution
+                }
             }
             else {
                 this.krnTrace(`No program found with PID: ${pid}`);

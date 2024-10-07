@@ -20,6 +20,7 @@
 var TSOS;
 (function (TSOS) {
     class Control {
+        static singleStepMode = false;
         static hostInit() {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
             // Get a global reference to the canvas.  TODO: Should we move this stuff into a Display Device Driver?
@@ -71,6 +72,12 @@ var TSOS;
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
+            // initializing memory
+            Control.hostLog("Initializing memory");
+            _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
+            Control.hostLog("Initializing memory accessor");
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory); // Create MemoryAccessor to manage memory
+            Control.hostLog("Memory set up");
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
@@ -89,6 +96,32 @@ var TSOS;
         static hostBtnReset_click(btn) {
             // The easiest and most thorough way to do this is to reload (not refresh) the document.
             location.reload();
+        }
+        // this method allows single step to be activated. it toggles on and off allowing the user to press the "step" button to execute one cpu cycle at a tim
+        static toggleSingleStep() {
+            this.singleStepMode = !this.singleStepMode; // toggle the mode
+            const toggleBtn = document.getElementById("btnToggleStep");
+            const stepBtn = document.getElementById("btnStep");
+            // if true, pause execution until the step button is pressed
+            if (this.singleStepMode) {
+                toggleBtn.setAttribute("value", "Single Step: On");
+                stepBtn.removeAttribute("disabled"); // enable the Step button. while it says disabled, we take the true away, see the else statement
+                _CPU.isExecuting = false; // Pause continuous execution
+            }
+            // otherwise continue normal cpu execution
+            else {
+                toggleBtn.setAttribute("value", "Single Step: Off");
+                stepBtn.setAttribute("disabled", "true"); // Disable the Step button
+                _CPU.isExecuting = true; // Resume normal execution
+            }
+        }
+        // this allows for a single step to be made in execution
+        static singleStep() {
+            if (this.singleStepMode && !_CPU.isExecuting) {
+                _CPU.isExecuting = true; // allows one cycle to be executed 
+                _CPU.cycle();
+                _CPU.isExecuting = false; // pauses execution after that ycle has completed
+            }
         }
         // cpu status 
         static updateCpuStatus() {

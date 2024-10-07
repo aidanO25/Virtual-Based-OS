@@ -79,6 +79,11 @@ var TSOS;
                 TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                 // saves the current state of the pcb
                 this.savePCB();
+                // checks if single step mode has been activated
+                if (TSOS.Control.singleStepMode) {
+                    // if so, execute one instruction and then stop execution
+                    this.isExecuting = false;
+                }
             }
         }
         // these are the instructions from the 6502alan Machine language Instruction Set

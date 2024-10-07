@@ -81,9 +81,16 @@
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
-                    
+
                     // saves the current state of the pcb
                     this.savePCB();
+
+                    // checks if single step mode has been activated
+                    if (TSOS.Control.singleStepMode) 
+                    {
+                        // if so, execute one instruction and then stop execution
+                        this.isExecuting = false;
+                    }
                 }
 
             }

@@ -21,6 +21,7 @@
 module TSOS {
 
     export class Control {
+        public static singleStepMode: boolean = false; 
 
         public static hostInit(): void {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
@@ -90,6 +91,14 @@ module TSOS {
 
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
+
+            // initializing memory
+            Control.hostLog("Initializing memory");
+            _Memory = new TSOS.Memory(256);  // Initialize memory with 256 bytes
+            Control.hostLog("Initializing memory accessor");
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory);  // Create MemoryAccessor to manage memory
+            Control.hostLog("Memory set up");
+
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new Kernel();
             _Kernel.krnBootstrap();  // _GLaDOS.afterStartup() will get called in there, if configured.
@@ -111,6 +120,40 @@ module TSOS {
         public static hostBtnReset_click(btn): void {
             // The easiest and most thorough way to do this is to reload (not refresh) the document.
             location.reload();
+        }
+
+        // this method allows single step to be activated. it toggles on and off allowing the user to press the "step" button to execute one cpu cycle at a tim
+        public static toggleSingleStep(): void 
+        {
+            this.singleStepMode = !this.singleStepMode; // toggle the mode
+        
+            const toggleBtn = document.getElementById("btnToggleStep");
+            const stepBtn = document.getElementById("btnStep");
+        
+            // if true, pause execution until the step button is pressed
+            if (this.singleStepMode) 
+            {
+                toggleBtn.setAttribute("value", "Single Step: On");
+                stepBtn.removeAttribute("disabled"); // enable the Step button. while it says disabled, we take the true away, see the else statement
+                _CPU.isExecuting = false; // Pause continuous execution
+            } 
+            // otherwise continue normal cpu execution
+            else
+            {
+                toggleBtn.setAttribute("value", "Single Step: Off");
+                stepBtn.setAttribute("disabled", "true"); // Disable the Step button
+                _CPU.isExecuting = true; // Resume normal execution
+            }
+        }
+
+        // this allows for a single step to be made in execution
+        public static singleStep(): void 
+        {
+            if (this.singleStepMode && !_CPU.isExecuting) {
+                _CPU.isExecuting = true; // allows one cycle to be executed 
+                _CPU.cycle(); 
+                _CPU.isExecuting = false; // pauses execution after that ycle has completed
+            }
         }
 
         // cpu status 
