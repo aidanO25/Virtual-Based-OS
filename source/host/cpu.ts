@@ -79,7 +79,8 @@
                     _StdOut.putText(`| PC: ${this.PC} | Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
                     _StdOut.advanceLine();
 
-                    TSOS.Control.updateCpuStatus();
+                    TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
+                    TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     
                     // saves the current state of the pcb
                     this.savePCB();

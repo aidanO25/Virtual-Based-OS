@@ -87,7 +87,7 @@ module TSOS {
             this.commandList[this.commandList.length] = sc;
 
             // fun facts
-            sc = new ShellCommand(this.shellDisplayMemory,
+            sc = new ShellCommand(this.shellFact,
                                   "fact",
                                   "Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
@@ -110,11 +110,6 @@ module TSOS {
                                     "<pid> - Runs the program with the given Process ID (PID).");
             this.commandList[this.commandList.length] = sc;
 
-            sc = new ShellCommand(this.shellDisplayMemory, 
-                                    "display", 
-                                    "Displays the program in memory");
-            this.commandList[this.commandList.length] = sc;
-            
             // bsod
             sc = new ShellCommand(this.shellbsod, 
                                   "bsod", 
@@ -468,8 +463,9 @@ module TSOS {
 
                 if (isValid) 
                 {
-                    // load the program into memory using MemoryManager
-                    const pid = _MemoryManager.loadProgram(program);
+                    TSOS.Control.updateMemoryDisplay(false);
+                    const pid = _MemoryManager.loadProgram(program); // loads a program into memory
+                    TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     _StdOut.putText(`Program loaded with PID: ${pid}`);
                 } 
                 else 
@@ -519,14 +515,6 @@ module TSOS {
             else 
             {
                 _StdOut.putText("Usage: run <pid>");
-            }
-        }
-
-        public shellDisplayMemory(args: string[]) {
-            for (let i = 0; i < 15; i++) {
-                const value = _MemoryAccessor.read(i);
-                _StdOut.putText(`Address ${i.toString(16).toUpperCase()}: ${value.toString(16).toUpperCase()}`);
-                _StdOut.advanceLine();
             }
         }
     }

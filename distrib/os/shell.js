@@ -52,7 +52,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellLocation, "location", "Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
             // fun facts
-            sc = new TSOS.ShellCommand(this.shellDisplayMemory, "fact", "Gives the user a fun fact");
+            sc = new TSOS.ShellCommand(this.shellFact, "fact", "Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
             // status message
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Updates the current status");
@@ -62,8 +62,6 @@ var TSOS;
             this.commandList[this.commandList.length] = sc;
             // runs a program in memory 
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - Runs the program with the given Process ID (PID).");
-            this.commandList[this.commandList.length] = sc;
-            sc = new TSOS.ShellCommand(this.shellDisplayMemory, "display", "Displays the program in memory");
             this.commandList[this.commandList.length] = sc;
             // bsod
             sc = new TSOS.ShellCommand(this.shellbsod, "bsod", "Call at your own risk");
@@ -385,8 +383,9 @@ var TSOS;
                     program.push(parseInt(hexByte, 16)); // converts the hex pair to a number and stores it in the program array
                 }
                 if (isValid) {
-                    // load the program into memory using MemoryManager
-                    const pid = _MemoryManager.loadProgram(program);
+                    TSOS.Control.updateMemoryDisplay(false);
+                    const pid = _MemoryManager.loadProgram(program); // loads a program into memory
+                    TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     _StdOut.putText(`Program loaded with PID: ${pid}`);
                 }
                 else {
@@ -427,13 +426,6 @@ var TSOS;
             }
             else {
                 _StdOut.putText("Usage: run <pid>");
-            }
-        }
-        shellDisplayMemory(args) {
-            for (let i = 0; i < 15; i++) {
-                const value = _MemoryAccessor.read(i);
-                _StdOut.putText(`Address ${i.toString(16).toUpperCase()}: ${value.toString(16).toUpperCase()}`);
-                _StdOut.advanceLine();
             }
         }
     }
