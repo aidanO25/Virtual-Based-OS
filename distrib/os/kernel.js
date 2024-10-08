@@ -51,7 +51,8 @@ var TSOS;
             this.krnTrace("Creating and Launching the shell.");
             _OsShell = new TSOS.Shell();
             _OsShell.init();
-            // Finally, initiate student testing protocol.
+            // Finally, initiate student testing protocol. 
+            // i mean i have looked everywhere and can see it's being called properly. I'm oblivious as to how i broke glados
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();
             }

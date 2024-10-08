@@ -61,14 +61,10 @@ var _krnKeyboardDriver: TSOS.DeviceDriverKeyboard  = null;
 
 var _hardwareClockID: number = null;
 
-// For testing (and enrichment)...
+// For testing (and enrichment)... 
+// still defined
 var Glados: any = null;  // This is the function Glados() in glados-ip*.js http://alanclasses.github.io/TSOS/test/ .
 var _GLaDOS: any = null; // If the above is linked in, this is the instantiated instance of Glados.
-
-// initialization of the memory system alowing other classes to access them
-var _Memory: TSOS.Memory;
-var _MemoryAccessor: TSOS.MemoryAccessor;
-var _MemoryManager: TSOS.MemoryManager;
 
 var onDocumentLoad = function() {
 	TSOS.Control.hostInit();
