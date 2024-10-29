@@ -428,6 +428,16 @@ var TSOS;
                 _StdOut.putText("Usage: run <pid>");
             }
         }
+        // BSOD command to test screen of death
+        shellbsod(args) {
+            const bsodImage = new Image(); // object for our bsod image
+            bsodImage.src = "error.png"; // image path
+            // once the iage is loaded it's presented onto the canvas
+            bsodImage.onload = () => {
+                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
+                _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
+            };
+        }
     }
     TSOS.Shell = Shell;
 })(TSOS || (TSOS = {}));

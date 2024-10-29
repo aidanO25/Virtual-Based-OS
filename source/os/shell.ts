@@ -474,7 +474,6 @@ module TSOS {
                 }
             }
         }
-
         /*
         BSOD command to test screen of death. As you can see this changed from what was previously there. 
         it is still fixed, however my previous commit put this back to what i originally had (bsod would not display) 
@@ -482,6 +481,8 @@ module TSOS {
         */
         public shellbsod(): void 
         {
+        // BSOD command to test screen of death
+        public shellbsod(args: string[]): void {
             const bsodImage = new Image(); // object for our bsod image
             bsodImage.src = "error.png"; // image path
             // once the iage is loaded it's presented onto the canvas
