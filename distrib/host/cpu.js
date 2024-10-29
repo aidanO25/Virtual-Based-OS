@@ -45,7 +45,7 @@ var TSOS;
         loadPCB(pcb) {
             // loading the pCB values into the CPU
             this.pcb = pcb;
-            this.PC = pcb.PC;
+            this.PC = pcb.base;
             this.Acc = pcb.ACC;
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
@@ -54,7 +54,8 @@ var TSOS;
         }
         // saves the current state of the CPU back into the PCB
         savePCB() {
-            if (this.pcb) {
+            const pcb = _MemoryManager.getPCB(this.PC);
+            if (pcb) {
                 this.pcb.PC = this.PC;
                 this.pcb.ACC = this.Acc;
                 this.pcb.Xreg = this.Xreg;

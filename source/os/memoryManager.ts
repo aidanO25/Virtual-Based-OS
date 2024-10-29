@@ -9,36 +9,60 @@ module TSOS {
         private memoryAccessor: MemoryAccessor;
         private nextPID: number; // to keep track of the next available PID
         private pcbs: PCB[]; // an array to store PCBs
+        private partitions: number = 3; // number of memory partitions (0, 1, 2)
+        private availablePartitions: boolean[]; // keeps track of available partitions as truth values
 
         constructor(memoryAccessor: MemoryAccessor) {
             this.memoryAccessor = memoryAccessor;
             this.nextPID = 0;
             this.pcbs = [];
+            this.availablePartitions = new Array(this.partitions).fill(true); // all partitions start as usasable 
         }
 
-        // loads a program into memory and create a PCB for it
-        public loadProgram(program: number[]): number
+        // to keep track of where to start writing in memory
+        private getBaseAddress(partition: number): number {
+            switch (partition) {
+                case 0: return 0;
+                case 1: return 256;
+                case 2: return 512;
+            }
+        }
+
+        // finds the next available partition
+        private findAvailablePartition(): number {
+            for (let i = 0; i < this.partitions; i++) {
+                if (this.availablePartitions[i]) {
+                    return i;
+                }
+            }
+            console.log("No available partitions.");
+        }
+        
+        public loadProgram(program: number[]): number 
         {
-            const base = 0; // because memory starts at 0
-            const limit = program.length; // limit is the program size
-
-            // making sure there is enough space in memory (idk if this is necessary but I'm sure a good thing to have)
-            if(limit > this.memoryAccessor.memory.size)
+            const partition = this.findAvailablePartition(); // to find a partition
+            const baseAddress = this.getBaseAddress(partition); // gets the base address to know where to start loading the program in
+            const limitAddress = baseAddress + 256; // Each partition is 256 bytes
+        
+            // checks if the program length exceeds the partition size and if so it says so 
+            if (program.length > 256) 
             {
-                _StdOut.putText("Program exceeds memory size");
+                console.log("Program size exceeds partition size.");
             }
-
+        
             // loads the program into memory
-            for(let i = 0; i < program.length; i++)
+            for (let i = 0; i < program.length; i++) 
             {
-                this.memoryAccessor.write(base + i, program[i]);
+                this.memoryAccessor.write(baseAddress + i, program[i]);
             }
-
-            // creates a new PCB for the process
-            const pcb = new TSOS.PCB(this.nextPID++, base, limit);
-            this.pcbs.push(pcb); // ads the pcb to the list
-
-            return pcb.PID; // returns the process ID
+        
+            // creates a new PCB for the process with the right base and limit addresses
+            const pcb = new PCB(this.nextPID++, baseAddress, limitAddress);
+            this.pcbs.push(pcb);
+            this.availablePartitions[partition] = false; // marks the partition as taken
+        
+            console.log(`Program loaded into memory with PID ${pcb.PID}`);
+            return pcb.PID; // returns the program's process ID
         }
 
         // retrieves a PCB by its PID

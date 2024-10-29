@@ -398,6 +398,7 @@ var TSOS;
         it is still fixed, however my previous commit put this back to what i originally had (bsod would not display)
         because I screwed this file up so bad that i had to go bck into github and copy and paste the last time it was working (classic)
         */
+        // BSOD command to test screen of death
         shellbsod() {
             const bsodImage = new Image(); // object for our bsod image
             bsodImage.src = "error.png"; // image path
@@ -411,12 +412,12 @@ var TSOS;
         shellRun(args) {
             if (args.length > 0) {
                 const pid = parseInt(args[0]);
-                // Fetch the PCB using the MemoryManager
+                // Fetch the PCB using the MemoryManager based on the input pid
                 const pcb = _MemoryManager.getPCB(pid);
+                // if true
                 if (pcb) {
                     // Load the PCB into the CPU
                     _CPU.loadPCB(pcb);
-                    // Start executing the program
                     _CPU.isExecuting = true;
                     _StdOut.putText(`Program with PID: ${pid} is now running.`);
                 }
@@ -427,16 +428,6 @@ var TSOS;
             else {
                 _StdOut.putText("Usage: run <pid>");
             }
-        }
-        // BSOD command to test screen of death
-        shellbsod(args) {
-            const bsodImage = new Image(); // object for our bsod image
-            bsodImage.src = "error.png"; // image path
-            // once the iage is loaded it's presented onto the canvas
-            bsodImage.onload = () => {
-                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
-                _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
-            };
         }
     }
     TSOS.Shell = Shell;

@@ -74,7 +74,7 @@ var TSOS;
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
             // initializing memory
             Control.hostLog("Initializing memory");
-            _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
+            _Memory = new TSOS.Memory(768); // increased memory size to allow for partitions
             Control.hostLog("Initializing memory accessor");
             _MemoryAccessor = new TSOS.MemoryAccessor(_Memory); // Create MemoryAccessor to manage memory
             Control.hostLog("Memory set up");

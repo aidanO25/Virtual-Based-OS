@@ -479,10 +479,9 @@ module TSOS {
         it is still fixed, however my previous commit put this back to what i originally had (bsod would not display) 
         because I screwed this file up so bad that i had to go bck into github and copy and paste the last time it was working (classic)
         */
-        public shellbsod(): void 
-        {
         // BSOD command to test screen of death
-        public shellbsod(args: string[]): void {
+        public shellbsod()
+        {
             const bsodImage = new Image(); // object for our bsod image
             bsodImage.src = "error.png"; // image path
             // once the iage is loaded it's presented onto the canvas
@@ -493,18 +492,18 @@ module TSOS {
         }
 
         // This is the shell command to run a program from memory per its PID
-        public shellRun(args: string[]) 
+        public shellRun(args: string[])
         {
             if (args.length > 0) 
             {
                 const pid = parseInt(args[0]);
-                // Fetch the PCB using the MemoryManager
+                // Fetch the PCB using the MemoryManager based on the input pid
                 const pcb = _MemoryManager.getPCB(pid);
-
-                if (pcb) {
+                // if true
+                if (pcb) 
+                {
                     // Load the PCB into the CPU
-                    _CPU.loadPCB(pcb);
-                    // Start executing the program
+                    _CPU.loadPCB(pcb)
                     _CPU.isExecuting = true;
                     _StdOut.putText(`Program with PID: ${pid} is now running.`);
                 } 
