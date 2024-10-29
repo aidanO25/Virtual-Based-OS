@@ -46,3 +46,30 @@ h3 {
   font-size: 8pt;
   text-align: center;
 }
+
+/* formatting for memory display */
+#divMemoryDisplay 
+{
+  width: 400px; 
+}
+
+#memoryTable 
+{
+  font-family: monospace;
+  font-size: 12px; 
+  border-spacing: 0;
+  border: 1px solid black;
+  width: 100%; 
+}
+
+#memoryTable td 
+{
+  padding: 2px; 
+  border: 1px solid black;
+  width: 40px; 
+}
+
+#memoryTable tr:nth-child(odd) td:first-child 
+{
+  background-color: #cce5ff; 
+}

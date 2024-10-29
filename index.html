@@ -15,6 +15,8 @@
    <script type="text/javascript" src="distrib/host/control.js"></script>
    <script type="text/javascript" src="distrib/host/devices.js"></script>
    <script type="text/javascript" src="distrib/host/cpu.js"></script>
+   <script type="text/javascript" src="distrib/host/memory.js"></script>
+   <script type="text/javascript" src="distrib/host/memoryAccessor.js"></script>
 
    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
    <script type="text/javascript" src="distrib/os/interrupt.js"></script>
@@ -28,9 +30,14 @@
    <script type="text/javascript" src="distrib/os/userCommand.js"></script>
    <script type="text/javascript" src="distrib/os/kernel.js"></script>
 
+   <!-- I know we talked about it in classs, but i had completely forgot to do this. took me 2 days to trouble shoot. classic. -->
+   <script type="text/javascript" src="distrib/os/memoryManager.js"></script>
+   <script type="text/javascript" src="distrib/os/pcb.js"></script>
+
    <!-- Other Routines -->
    <script type="text/javascript" src="distrib/utils.js"></script>
    <!-- Uncomment the line below to enable GLaDOS testing. -->
+    <!-- Still uncommented-->
    <script type="text/javascript" src="http://alanclasses.github.io/TSOS/test/glados-ip0.js"></script>
 
    <!-- Status bar to show date, time, and status -->
@@ -85,7 +92,26 @@
              value="Reset"
              tabindex="2"
              onclick="TSOS.Control.hostBtnReset_click(this);">
-   </div>
+
+      <!-- single step toggle button -->
+      <input type="button"
+         id="btnToggleStep"
+         name="btnToggleStep"
+         class="normal_button"
+         value="Single Step: Off"
+         tabindex="3"
+         style="width: 150px;"
+         onclick="TSOS.Control.toggleSingleStep();">
+
+      <!-- step button (initially disabled) -->
+      <input type="button"
+            id="btnStep"
+            name="btnStep"
+            class="normal_button"
+            value="Step"
+            tabindex="4"
+            disabled="disabled"
+            onclick="TSOS.Control.singleStep();">
 
    <!-- The actual status bar to be displayed -->
    <div id="statusBar" style="margin: 10px; padding: 10px; background-color: lightgrey; font-weight: bold;">
@@ -98,6 +124,27 @@
               height="500px"
               tabindex="3">
       </canvas>
+   </div>
+
+   <!-- displays the cpu state (I accidnetally commited this to #12 instead of #13 just because of confusion of the requirement)--> 
+   <div id="divCpuDisplay" style="margin-left:520px; margin-top:20px;">
+      <label>CPU Display</label>
+      <table border="1" style="border-collapse: collapse; text-align: center; background-color: white;">
+         <tr>
+            <th>PC</th>
+            <th>ACC</th>
+            <th>X Reg</th>
+            <th>Y Reg</th>
+            <th>Zflag</th>
+         </tr>
+         <tr>
+            <td id="cpuPC">0</td>
+            <td id="cpuACC">0</td>
+            <td id="cpuX">0</td>
+            <td id="cpuY">0</td>
+            <td id="cpuZ">0</td>
+         </tr>
+      </table>
    </div>
 
    <div id="divLog" style="margin-left:520px;">
@@ -123,6 +170,17 @@
          ></textarea>
       </label>
    </div>
+
+   <!-- This is to display the program in memory-->
+   <div id="divMemoryDisplay" style="margin-left:520px; margin-top:20px; width:400px;">
+      <label>Memory Display</label>
+      <div style="height: 150px; width: 400px; overflow-y: scroll;"> <!-- Set a fixed width and height -->
+          <table id="memoryTable" border="1" style="border-collapse: collapse; text-align: center; background-color: white; width: 100%;">
+              <!-- rows are populated dynamically -->
+          </table>
+      </div>
+  </div>
+
 </div>
 
 <p class="footerText" style="clear:both;">

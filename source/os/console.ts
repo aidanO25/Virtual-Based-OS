@@ -76,52 +76,83 @@ module TSOS {
             }
         }
 
-        public putText(text): void {
-            /*  My first inclination here was to write two functions: putChar() and putString().
-                Then I remembered that JavaScript is (sadly) untyped and it won't differentiate
-                between the two. (Although TypeScript would. But we're compiling to JavaScipt anyway.)
-                So rather than be like PHP and write two (or more) functions that
-                do the same thing, thereby encouraging confusion and decreasing readability, I
-                decided to write one function and use the term "text" to connote string or char.
-            */
+        public putText(text: string): void 
+        {
+
             if (text !== "") {
-                // Draw the text at the current X and Y coordinates.
-                _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, text);
-                // Move the current X position.
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, text);
-                this.currentXPosition = this.currentXPosition + offset;
+                const words = text.split(" ");  // splits text into words to handle wrapping properly
+        
+                for (let i = 0; i < words.length; i++) {
+                    const word = words[i];
+                    const wordWidth = _DrawingContext.measureText(this.currentFont, this.currentFontSize, word);
+        
+                    // checks if the word fits on the current line, if it doesn't this advances the cursor to the next line
+                    if (this.currentXPosition + wordWidth > _Canvas.width) {
+                        this.advanceLine();
+                    }
+        
+                    // draws the word
+                    _DrawingContext.drawText(this.currentFont, this.currentFontSize, this.currentXPosition, this.currentYPosition, word);
+                    this.currentXPosition += wordWidth;  // Update X position for the next word
+        
+                    // AddS space after word (if it's not the last word)
+                    if (i < words.length - 1) {
+                        const spaceWidth = _DrawingContext.measureText(this.currentFont, this.currentFontSize, " ");
+                        this.currentXPosition += spaceWidth;
+                    }
+                }
             }
-         }
+        }
 
         public advanceLine(): void {
-            this.currentXPosition = 0;
-            /*
-             * Font size measures from the baseline to the highest point in the font.
-             * Font descent measures from the baseline to the lowest point in the font.
-             * Font height margin is extra spacing between the lines.
-             */
-            this.currentYPosition += _DefaultFontSize + 
-                                     _DrawingContext.fontDescent(this.currentFont, this.currentFontSize) +
-                                     _FontHeightMargin;
-
-            // checks if the current Y position goes past the canvas length
-            if(this.currentYPosition > _Canvas.height - _DefaultFontSize) {
+            this.currentXPosition = 0;  // ResetS X to the beginning of the new line
+            this.currentYPosition += this.currentFontSize + _FontHeightMargin;  // Move Y down by the font size + margin
+        
+            // Handle scrolling if the current Y position exceeds the canvas height
+            if (this.currentYPosition > _Canvas.height - this.currentFontSize) {
                 this.handleScrolling();
             }
         }
-        // enabling backspace
+
         public handleBackspace(): void 
         {
-            if (this.buffer.length > 0) // checking to see if there are even characters in the buffer
+            if (this.buffer.length > 0) 
             {
-                var lastChar = this.buffer[this.buffer.length - 1];
-                var offset = _DrawingContext.measureText(this.currentFont, this.currentFontSize, lastChar); // measuring the width of the last character, needed AI help with this idea
-                this.currentXPosition -= offset;
-                // clearing a slightly larger area to account for descenders (also got some AI help with this because for characters such as g for j, a small bit of the bottom portion wouldn't be deleted)
-                _DrawingContext.clearRect(this.currentXPosition, this.currentYPosition - this.currentFontSize, offset, this.currentFontSize + _FontHeightMargin + 10);
-                this.buffer = this.buffer.slice(0, -1); // removing the last character
+                const lastChar = this.buffer[this.buffer.length - 1];
+                const lastCharWidth = _DrawingContext.measureText(this.currentFont, this.currentFontSize, lastChar);
+        
+                // If we're at the start of the line, move to the previous line
+                if (this.currentXPosition - lastCharWidth < 0) 
+                {
+                    this.moveToPreviousLine(); 
+                }
+        
+                // clears the spot where the character was drawn
+                _DrawingContext.clearRect(
+                    this.currentXPosition - lastCharWidth,
+                    this.currentYPosition - this.currentFontSize,
+                    lastCharWidth,
+                    this.currentFontSize + _FontHeightMargin
+                );
+        
+                // moves the cursor back by the width of the last character
+                this.currentXPosition -= lastCharWidth;
+        
+                // removes the last character from the buffer
+                this.buffer = this.buffer.slice(0, -1);
             }
         }
+        
+        // moves to the previous line for char deletion
+        private moveToPreviousLine(): void 
+        {
+            // moves the cursor's y up to the previous line
+            this.currentYPosition -= this.currentFontSize + _FontHeightMargin;
+        
+            // ses the cursor's x to the end of the previous line 
+            this.currentXPosition = _Canvas.width;
+        }
+
         // enabling tab completion
         public handleTabCompletion(): void {
             const commands = _OsShell.commandList.map(cmd => cmd.command); // this takes in the list of available shell commands. I had help with both this line and the one below to make a list of commands and filtering through them. See commit description

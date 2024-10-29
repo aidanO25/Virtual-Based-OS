@@ -6,6 +6,12 @@
      This code references page numbers in the text book:
      Operating System Concepts 8th edition by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
      ------------ */
+// initialization of the memory system alowing other classes to access them
+// I see there is a globals.ts file, and I could probably put it there, but i was having problems when I trid the first time, ill try and figure that out next push
+var _Memory;
+var _MemoryAccessor;
+var _MemoryManager;
+var _CPU;
 var TSOS;
 (function (TSOS) {
     class Kernel {
@@ -14,6 +20,12 @@ var TSOS;
         //
         krnBootstrap() {
             TSOS.Control.hostLog("bootstrap", "host"); // Use hostLog because we ALWAYS want this, even if _Trace is off.
+            this.krnTrace("initializing memory manager");
+            _MemoryManager = new TSOS.MemoryManager(_MemoryAccessor); // Initialize the memory manager
+            this.krnTrace("manager setup complete");
+            this.krnTrace("Initializing CPU.");
+            _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
+            this.krnTrace("CPU initialized.");
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.
@@ -39,7 +51,8 @@ var TSOS;
             this.krnTrace("Creating and Launching the shell.");
             _OsShell = new TSOS.Shell();
             _OsShell.init();
-            // Finally, initiate student testing protocol.
+            // Finally, initiate student testing protocol. 
+            // i mean i have looked everywhere and can see it's being called properly. I'm oblivious as to how i broke glados
             if (_GLaDOS) {
                 _GLaDOS.afterStartup();
             }
@@ -145,6 +158,23 @@ var TSOS;
                 else {
                     TSOS.Control.hostLog(msg, "OS");
                 }
+            }
+        }
+        krnRunProcess(pid) {
+            const pcb = _MemoryManager.getPCB(pid);
+            if (pcb) {
+                this.krnTrace(`Running program with PID: ${pid}`);
+                _CPU.loadPCB(pcb); // Load the process into the CPU
+                // Check if single-step mode is enabled
+                if (TSOS.Control.singleStepMode) {
+                    _CPU.isExecuting = false; // Prevent continuous execution in single-step mode
+                }
+                else {
+                    _CPU.isExecuting = true; // Start normal execution
+                }
+            }
+            else {
+                this.krnTrace(`No program found with PID: ${pid}`);
             }
         }
         krnTrapError(msg) {

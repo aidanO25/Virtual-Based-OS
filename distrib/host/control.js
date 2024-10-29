@@ -20,6 +20,7 @@
 var TSOS;
 (function (TSOS) {
     class Control {
+        static singleStepMode = false;
         static hostInit() {
             // This is called from index.html's onLoad event via the onDocumentLoad function pointer.
             // Get a global reference to the canvas.  TODO: Should we move this stuff into a Display Device Driver?
@@ -71,9 +72,17 @@ var TSOS;
             _CPU.init(); //       There's more to do, like dealing with scheduling and such, but this would be a start. Pretty cool.
             // ... then set the host clock pulse ...
             _hardwareClockID = setInterval(TSOS.Devices.hostClockPulse, CPU_CLOCK_INTERVAL);
+            // initializing memory
+            Control.hostLog("Initializing memory");
+            _Memory = new TSOS.Memory(256); // Initialize memory with 256 bytes
+            Control.hostLog("Initializing memory accessor");
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory); // Create MemoryAccessor to manage memory
+            Control.hostLog("Memory set up");
             // .. and call the OS Kernel Bootstrap routine.
             _Kernel = new TSOS.Kernel();
             _Kernel.krnBootstrap(); // _GLaDOS.afterStartup() will get called in there, if configured.
+            // populates the memory display table with 0s
+            TSOS.Control.updateMemoryDisplay(true);
         }
         static hostBtnHaltOS_click(btn) {
             Control.hostLog("Emergency halt", "host");
@@ -87,6 +96,83 @@ var TSOS;
         static hostBtnReset_click(btn) {
             // The easiest and most thorough way to do this is to reload (not refresh) the document.
             location.reload();
+        }
+        // this method allows single step to be activated. it toggles on and off allowing the user to press the "step" button to execute one cpu cycle at a tim
+        static toggleSingleStep() {
+            this.singleStepMode = !this.singleStepMode; // toggle the mode
+            const toggleBtn = document.getElementById("btnToggleStep");
+            const stepBtn = document.getElementById("btnStep");
+            // if true, pause execution until the step button is pressed
+            if (this.singleStepMode) {
+                toggleBtn.setAttribute("value", "Single Step: On");
+                stepBtn.removeAttribute("disabled"); // enable the Step button. while it says disabled, we take the true away, see the else statement
+                _CPU.isExecuting = false; // Pause continuous execution
+            }
+            // otherwise continue normal cpu execution
+            else {
+                toggleBtn.setAttribute("value", "Single Step: Off");
+                stepBtn.setAttribute("disabled", "true"); // Disable the Step button
+                _CPU.isExecuting = true; // Resume normal execution
+            }
+        }
+        // this allows for a single step to be made in execution
+        static singleStep() {
+            if (this.singleStepMode && !_CPU.isExecuting) {
+                _CPU.isExecuting = true; // allows one cycle to be executed 
+                _CPU.cycle();
+                _CPU.isExecuting = false; // pauses execution after that ycle has completed
+            }
+        }
+        // cpu status 
+        static updateCpuStatus() {
+            document.getElementById("cpuPC").innerText = _CPU.PC.toString();
+            document.getElementById("cpuACC").innerText = _CPU.Acc.toString();
+            document.getElementById("cpuX").innerText = _CPU.Xreg.toString();
+            document.getElementById("cpuY").innerText = _CPU.Yreg.toString();
+            document.getElementById("cpuZ").innerText = _CPU.Zflag.toString();
+        }
+        // this displays the memory in the UI 
+        /*
+        (I had some AI help with this, specifically the for loops for populating/setting up the table or grid.
+        I wasnt exactly sure how to go about it, whether to set it up within index.html and then populate the index within the memory aray in there, or do it all within this file
+        */
+        static updateMemoryDisplay(prepopulate = false) {
+            const memoryTable = document.getElementById("memoryTable");
+            // clear existing memory table rows
+            while (memoryTable.rows.length > 0) {
+                memoryTable.deleteRow(0);
+            }
+            const valuesPerRow = 8; // variable to set how many values we want per row (I just set it to what the hall of fame projects had)
+            const pc = _CPU.PC; // gets the current program counter 
+            // the for loop iterates over memory and populates the table
+            for (let address = 0; address < _Memory.memoryArray.length; address += valuesPerRow) {
+                const row = memoryTable.insertRow(); // Insert a new row
+                // inserts the address in the first cell
+                const cellAddress = row.insertCell(0);
+                cellAddress.innerHTML = address.toString(16).toUpperCase().padStart(3, '0'); // displays the address (in hex of course)
+                // insert memory values (use 00 if prepopulating)
+                for (let i = 0; i < valuesPerRow; i++) {
+                    const memoryCell = row.insertCell(i + 1);
+                    // checks if the memory address matches the PC (current instruction)
+                    const currentAddress = address + i;
+                    if (prepopulate) {
+                        memoryCell.innerHTML = '00'; // prepopulate with zeros
+                    }
+                    else {
+                        const memoryValue = _Memory.getByte(currentAddress).toString(16).toUpperCase().padStart(2, '0');
+                        memoryCell.innerHTML = memoryValue;
+                        // this allows us to see the current instruction executing. it updates each cycle (check cpu.ts to see the implementation)
+                        if (currentAddress === pc) {
+                            memoryCell.style.backgroundColor = 'red'; // highlights current instruction
+                            memoryCell.style.color = 'white'; // figured I should change the text color to white for easier readability (I love CSS);
+                        }
+                        else {
+                            memoryCell.style.backgroundColor = ''; // if it's not the current instruction remove the red
+                            memoryCell.style.color = '';
+                        }
+                    }
+                }
+            }
         }
     }
     TSOS.Control = Control;
