@@ -6,22 +6,31 @@ var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
         memory;
-        base = 0; // Base address of current process
-        limit = 0; // Limit (end) address of current process
+        base;
+        limit;
         constructor(memory) {
             this.memory = memory;
-        } // initializing memory and allows for this class to "talk" with the memory class
-        // read a byte from a specific memory address
-        read(address) {
-            if (address >= 0 && address < this.memory.size) {
-                return this.memory.getByte(address);
+        }
+        // sets the base and limit for the current process
+        setBounds(base, limit) {
+            this.base = base;
+            this.limit = limit;
+        }
+        // checks if the address is within the base and limit bounds
+        checkMemoryBounds(address) {
+            if (address < this.base || address >= this.base + this.limit) {
+                throw new Error(`Memory access violation at address ${address}`);
             }
         }
-        // write a byte to the designated address
+        // reads a byte from a specific memory address
+        read(address) {
+            this.checkMemoryBounds(address);
+            return this.memory.getByte(address);
+        }
+        // writes a byte to the designated address 
         write(address, value) {
-            if (address >= 0 && address < this.memory.size) {
-                this.memory.setByte(address, value);
-            }
+            this.checkMemoryBounds(address);
+            this.memory.setByte(address, value);
         }
     }
     TSOS.MemoryAccessor = MemoryAccessor;

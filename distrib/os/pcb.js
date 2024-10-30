@@ -18,7 +18,7 @@ var TSOS;
         priority; // process priority 
         constructor(pid, base, limit, priority = 0) {
             this.PID = pid;
-            this.PC = 0; // Initialize PC to the start of the program
+            this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
             this.ACC = 0;
             this.Xreg = 0;
             this.Yreg = 0;

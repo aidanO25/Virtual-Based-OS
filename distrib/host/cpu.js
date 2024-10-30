@@ -41,15 +41,15 @@ var TSOS;
             this.Zflag = 0;
             this.isExecuting = false;
         }
-        // starts executing a process
+        // loads the current pcb into the cpu
         loadPCB(pcb) {
-            // loading the pCB values into the CPU
             this.pcb = pcb;
-            this.PC = pcb.base;
+            this.PC = pcb.PC;
             this.Acc = pcb.ACC;
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
             this.Zflag = pcb.Zflag;
+            this.memoryAccessor.setBounds(pcb.base, pcb.limit);
             this.isExecuting = true;
         }
         // saves the current state of the CPU back into the PCB

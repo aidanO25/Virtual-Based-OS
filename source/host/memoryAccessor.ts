@@ -3,32 +3,42 @@ This is my memory accessor class. The importance of it is to provide access to t
 It talked with the memory class to read from and write to specific memory addresses
 */
 
-module TSOS
+module TSOS 
 {
-    export class MemoryAccessor
+    export class MemoryAccessor 
     {
-        private base: number = 0;  // Base address of current process
-        private limit: number = 0; // Limit (end) address of current process
+        private base: number;
+        private limit: number;
 
-        constructor(public memory: Memory) {} // initializing memory and allows for this class to "talk" with the memory class
-        
+        constructor(public memory: Memory) {}
 
-        // read a byte from a specific memory address
-        public read(address: number): number
+        // sets the base and limit for the current process
+        public setBounds(base: number, limit: number): void 
         {
-            if(address >= 0 && address < this.memory.size)
-            {
-                return this.memory.getByte(address);
+            this.base = base;
+            this.limit = limit;
+        }
+
+        // checks if the address is within the base and limit bounds
+        private checkMemoryBounds(address: number): void 
+        {
+            if (address < this.base || address >= this.base + this.limit) {
+                throw new Error(`Memory access violation at address ${address}`);
             }
         }
 
-        // write a byte to the designated address
-        public write(address: number, value: number): void
+        // reads a byte from a specific memory address
+        public read(address: number): number 
         {
-            if(address >= 0 && address < this.memory.size)
-            {
-                this.memory.setByte(address, value);
-            }
+            this.checkMemoryBounds(address);
+            return this.memory.getByte(address);
+        }
+
+        // writes a byte to the designated address 
+        public write(address: number, value: number): void 
+        {
+            this.checkMemoryBounds(address);
+            this.memory.setByte(address, value);
         }
     }
 }
