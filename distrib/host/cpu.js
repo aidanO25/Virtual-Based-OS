@@ -54,8 +54,7 @@ var TSOS;
         }
         // saves the current state of the CPU back into the PCB
         savePCB() {
-            const pcb = _MemoryManager.getPCB(this.PC);
-            if (pcb) {
+            if (this.pcb) {
                 this.pcb.PC = this.PC;
                 this.pcb.ACC = this.Acc;
                 this.pcb.Xreg = this.Xreg;

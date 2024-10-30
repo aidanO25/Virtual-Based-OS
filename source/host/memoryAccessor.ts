@@ -7,7 +7,11 @@ module TSOS
 {
     export class MemoryAccessor
     {
+        private base: number = 0;  // Base address of current process
+        private limit: number = 0; // Limit (end) address of current process
+
         constructor(public memory: Memory) {} // initializing memory and allows for this class to "talk" with the memory class
+        
 
         // read a byte from a specific memory address
         public read(address: number): number

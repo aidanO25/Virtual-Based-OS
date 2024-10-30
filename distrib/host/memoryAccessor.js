@@ -6,6 +6,8 @@ var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
         memory;
+        base = 0; // Base address of current process
+        limit = 0; // Limit (end) address of current process
         constructor(memory) {
             this.memory = memory;
         } // initializing memory and allows for this class to "talk" with the memory class
