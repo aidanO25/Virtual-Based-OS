@@ -19,7 +19,7 @@ var TSOS;
         // checks if the address is within the base and limit bounds
         checkMemoryBounds(address) {
             if (address < this.base || address >= this.base + this.limit) {
-                throw new Error(`Memory access violation at address ${address}`);
+                _Kernel.krnTrace(`Memory access violation at address ${address}`);
             }
         }
         // reads a byte from a specific memory address

@@ -23,7 +23,7 @@ module TSOS
         private checkMemoryBounds(address: number): void 
         {
             if (address < this.base || address >= this.base + this.limit) {
-                throw new Error(`Memory access violation at address ${address}`);
+                _Kernel.krnTrace(`Memory access violation at address ${address}`);
             }
         }
 

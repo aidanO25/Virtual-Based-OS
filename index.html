@@ -124,7 +124,33 @@
               height="500px"
               tabindex="3">
       </canvas>
+
+      <!-- PCB Display Section -->
+      <div id="divPcbDisplay" style="margin-top: 10px; width: 100%; text-align: center;">
+         <label>PCB Display</label>
+         <div style="margin: 0 auto; width: 400px; height: 200px; background-color: white; border: 1px solid black; overflow-y: auto;">
+            <table id="pcbTable" border="1" style="border-collapse: collapse; width: 100%; text-align: center;">
+               <thead>
+                  <tr>
+                     <th>PID</th>
+                     <th>State</th>
+                     <th>Location</th>
+                     <th>Priority</th>
+                     <th>PC</th>
+                     <th>Acc</th>
+                     <th>Xreg</th>
+                     <th>Yreg</th>
+                     <th>Zflag</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  <!-- rows are populated dynamically -->
+               </tbody>
+            </table>
+         </div>
+      </div>
    </div>
+
 
    <!-- displays the cpu state (I accidnetally commited this to #12 instead of #13 just because of confusion of the requirement)--> 
    <div id="divCpuDisplay" style="margin-left:520px; margin-top:20px;">
@@ -146,6 +172,7 @@
          </tr>
       </table>
    </div>
+
 
    <div id="divLog" style="margin-left:520px;">
       <label>

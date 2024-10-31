@@ -51,11 +51,16 @@ var TSOS;
             this.pcbs.push(pcb);
             this.availablePartitions[partition] = false; // marks the partition as taken
             console.log(`Program loaded into memory with PID ${pcb.PID}`);
+            TSOS.Control.updatePcbDisplay();
             return pcb.PID; // returns the program's process ID
         }
         // retrieves a PCB by its PID
         getPCB(pid) {
             return this.pcbs.find(pcb => pcb.PID === pid);
+        }
+        // this is for updating the pcb dispaly used by console.ts
+        getAllPIDs() {
+            return this.pcbs.map(pcb => pcb.PID);
         }
     }
     TSOS.MemoryManager = MemoryManager;

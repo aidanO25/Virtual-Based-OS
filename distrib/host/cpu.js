@@ -44,6 +44,11 @@ var TSOS;
         // loads the current pcb into the cpu
         loadPCB(pcb) {
             this.pcb = pcb;
+            if (pcb.PC < pcb.base || pcb.PC >= pcb.limit) // this makes sure the PC is within the process's memory bounds 
+             {
+                _Kernel.krnTrace(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
+                this.isExecuting = false;
+            }
             this.PC = pcb.PC;
             this.Acc = pcb.ACC;
             this.Xreg = pcb.Xreg;
