@@ -55,7 +55,7 @@ var TSOS;
             const pcb = new TSOS.PCB(this.nextPID++, baseAddress, limitAddress);
             this.pcbs.push(pcb);
             this.availablePartitions[partition] = false; // marks the partition as taken
-            console.log(`Program loaded with PID ${pcb.PID}`);
+            console.log(`Program loaded into memory with PID ${pcb.PID}`);
             TSOS.Control.updatePcbDisplay();
             return pcb.PID; // returns the program's process ID
         }

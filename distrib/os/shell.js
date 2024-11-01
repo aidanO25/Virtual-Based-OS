@@ -73,7 +73,7 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellps, "ps", "displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
             // bsod
-            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> displays the PID and state of all processes");
+            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> kills a process");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
@@ -274,6 +274,8 @@ var TSOS;
                         break;
                     case "ps":
                         _StdOut.putText("displays the PID and state of all processes");
+                    case "kill":
+                        _StdOut.putText("kills one process");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -464,6 +466,30 @@ var TSOS;
                 _StdOut.putText("PID: " + pcb.PID + ", State: " + pcb.state);
                 _StdOut.advanceLine();
             }
+        }
+        // kills a process
+        shellkill(args) {
+            // validates the command
+            if (args.length === 0 || isNaN(Number(args[0]))) {
+                _StdOut.putText("Usage: kill <pid> - Please provide a valid PID.");
+                return;
+            }
+            const pid = parseInt(args[0], 10); // converts the given pid to a number
+            const pcbToKill = _MemoryManager.getPCB(pid); // retrieves the PCB by PID
+            // checks if the PCB exists
+            if (!pcbToKill) {
+                _StdOut.putText(`Process with PID ${pid} not found.`);
+                return;
+            }
+            // marks the process as terminated 
+            pcbToKill.state = "Terminated";
+            _StdOut.putText(`Process ${pid} has been terminated.`);
+            // if the CPU is executing the process, stop the execution
+            if (_CPU.isExecuting && _CPU.getCurrentPCB() && _CPU.getCurrentPCB().PID === pid) {
+                _CPU.isExecuting = false; // Stop the CPU from cycling further
+            }
+            // update the PCB display  to show it's termination
+            TSOS.Control.updatePcbDisplay();
         }
     }
     TSOS.Shell = Shell;

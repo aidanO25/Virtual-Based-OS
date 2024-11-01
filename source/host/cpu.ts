@@ -65,6 +65,10 @@
                     this.pcb.Zflag = this.Zflag;
                 }
             }
+
+            public getCurrentPCB(): PCB | null {
+                return this.pcb;
+            }
     
             // this allows the cpu to fetch, decond, and execute
             public cycle(): void 
@@ -86,6 +90,7 @@
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
+                    TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
                     // saves the current state of the pcb
                     this.savePCB();

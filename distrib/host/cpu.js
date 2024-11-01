@@ -67,6 +67,9 @@ var TSOS;
                 this.pcb.Zflag = this.Zflag;
             }
         }
+        getCurrentPCB() {
+            return this.pcb;
+        }
         // this allows the cpu to fetch, decond, and execute
         cycle() {
             _Kernel.krnTrace('CPU cycle');
@@ -82,6 +85,7 @@ var TSOS;
                 //_StdOut.advanceLine();
                 TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                 TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
+                TSOS.Control.updatePcbDisplay(); // updates the PCB display
                 // saves the current state of the pcb
                 this.savePCB();
                 // checks if single step mode has been activated
