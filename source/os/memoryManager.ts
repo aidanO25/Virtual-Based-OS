@@ -77,8 +77,15 @@ module TSOS {
             return this.pcbs.map(pcb => pcb.PID);
         }
 
+        // gets all PCBs (really to just display each process wiht teh shell command ps)
+        public getAllPCBs(): PCB[]
+        {
+            return this.pcbs;
+        }
+
         // clears all instances of memory
-        public clearMemory(): void {
+        public clearMemory(): void 
+        {
             // clears memory through MemoryAccessor
             this.memoryAccessor.clearMemory();
 

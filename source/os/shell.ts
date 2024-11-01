@@ -116,10 +116,16 @@ module TSOS {
                                   "Call at your own risk");
             this.commandList[this.commandList.length] = sc;
 
-            // bsod
+            // clear's all memory
             sc = new ShellCommand(this.shellclearmem, 
                                     "clearmem", 
                                     "clears all memory segments");
+            this.commandList[this.commandList.length] = sc;
+
+            // bsod
+            sc = new ShellCommand(this.shellps, 
+                                    "ps", 
+                                    "displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -332,6 +338,9 @@ module TSOS {
                     case "clearmem":
                         _StdOut.putText("clears all memory segments");
                         break;
+                    case "ps":
+                        _StdOut.putText("displays the PID and state of all processes");
+                        break;
 
 
                     default:
@@ -529,12 +538,32 @@ module TSOS {
             }
         }
 
+        // clears all memory
         public shellclearmem()
         {
             _MemoryManager.clearMemory();   // clears memory and PCBs
             TSOS.Control.updatePcbDisplay();    // updates PCB display
             TSOS.Control.updateMemoryDisplay(); // updates memory display
             _StdOut.putText("Memory cleared.");  
+        }
+
+        // displays the PID and state of all processes
+        public shellps(): void 
+        {
+            const pcbs = _MemoryManager.getAllPCBs(); // gets all pcb's from memory manager
+        
+            if (pcbs.length === 0) {
+                _StdOut.putText("No processes in memory.");
+                return;
+            }
+        
+            // loops through each PCB and displays the PID and state
+            for (let i = 0; i < pcbs.length; i++) 
+            {
+                const pcb = pcbs[i];
+                _StdOut.putText("PID: " + pcb.PID + ", State: " + pcb.state);
+                _StdOut.advanceLine();
+            }
         }
     }
 }

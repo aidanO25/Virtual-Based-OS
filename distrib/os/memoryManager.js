@@ -62,6 +62,10 @@ var TSOS;
         getAllPIDs() {
             return this.pcbs.map(pcb => pcb.PID);
         }
+        // gets all PCBs (really to just display each process wiht teh shell command ps)
+        getAllPCBs() {
+            return this.pcbs;
+        }
         // clears all instances of memory
         clearMemory() {
             // clears memory through MemoryAccessor
