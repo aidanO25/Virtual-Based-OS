@@ -23,5 +23,6 @@ module TSOS
         {
             this.memoryArray[address] = value;
         }
+
     }
 }

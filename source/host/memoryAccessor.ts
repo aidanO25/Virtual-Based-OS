@@ -40,5 +40,14 @@ module TSOS
             this.checkMemoryBounds(address);
             this.memory.setByte(address, value);
         }
+
+        // clears all memory addresses
+        public clearMemory(): void 
+        {
+            for (let address = 0; address < this.memory.size; address++) 
+                {
+                this.write(address, 0);
+            }
+        }
     }
 }

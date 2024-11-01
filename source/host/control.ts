@@ -253,5 +253,12 @@ module TSOS {
                 }
             }
         }
+
+        // updates the PCB and memory display
+        public shellClearmem(args): void {
+            _MemoryManager.clearMemory(); // Clear all memory and PCBs
+            TSOS.Control.updatePcbDisplay(); // Refresh the PCB display
+            TSOS.Control.updateMemoryDisplay(); // refresh the memory display 
+        }
     }
 }

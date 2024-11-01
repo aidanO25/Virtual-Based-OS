@@ -199,6 +199,12 @@ var TSOS;
                 }
             }
         }
+        // updates the PCB and memory display
+        shellClearmem(args) {
+            _MemoryManager.clearMemory(); // Clear all memory and PCBs
+            TSOS.Control.updatePcbDisplay(); // Refresh the PCB display
+            TSOS.Control.updateMemoryDisplay(); // refresh the memory display 
+        }
     }
     TSOS.Control = Control;
 })(TSOS || (TSOS = {}));

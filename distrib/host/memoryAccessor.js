@@ -32,6 +32,12 @@ var TSOS;
             this.checkMemoryBounds(address);
             this.memory.setByte(address, value);
         }
+        // clears all memory addresses
+        clearMemory() {
+            for (let address = 0; address < this.memory.size; address++) {
+                this.write(address, 0);
+            }
+        }
     }
     TSOS.MemoryAccessor = MemoryAccessor;
 })(TSOS || (TSOS = {}));

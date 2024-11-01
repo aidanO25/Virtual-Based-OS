@@ -77,5 +77,17 @@ module TSOS {
             return this.pcbs.map(pcb => pcb.PID);
         }
 
+        // clears all instances of memory
+        public clearMemory(): void {
+            // clears memory through MemoryAccessor
+            this.memoryAccessor.clearMemory();
+
+            this.pcbs = []; // resets the PCBs array
+        
+            // marks all partitions as available
+            this.availablePartitions.fill(true);
+        
+        }
+
     }
 }

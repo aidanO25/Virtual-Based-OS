@@ -116,6 +116,12 @@ module TSOS {
                                   "Call at your own risk");
             this.commandList[this.commandList.length] = sc;
 
+            // bsod
+            sc = new ShellCommand(this.shellclearmem, 
+                                    "clearmem", 
+                                    "clears all memory segments");
+            this.commandList[this.commandList.length] = sc;
+
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.
 
@@ -323,6 +329,11 @@ module TSOS {
                     case "bsod":
                         _StdOut.putText("tests the screen of death");
                         break;
+                    case "clearmem":
+                        _StdOut.putText("clears all memory segments");
+                        break;
+
+
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -516,6 +527,14 @@ module TSOS {
             {
                 _StdOut.putText("Usage: run <pid>");
             }
+        }
+
+        public shellclearmem()
+        {
+            _MemoryManager.clearMemory();   // clears memory and PCBs
+            TSOS.Control.updatePcbDisplay();    // updates PCB display
+            TSOS.Control.updateMemoryDisplay(); // updates memory display
+            _StdOut.putText("Memory cleared.");  
         }
     }
 }

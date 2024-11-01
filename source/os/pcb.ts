@@ -31,5 +31,7 @@ module TSOS {
             this.priority = priority;  // Default priority is 0
         }
     }
+
+    
 }
 

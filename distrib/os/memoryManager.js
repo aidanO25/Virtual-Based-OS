@@ -62,6 +62,14 @@ var TSOS;
         getAllPIDs() {
             return this.pcbs.map(pcb => pcb.PID);
         }
+        // clears all instances of memory
+        clearMemory() {
+            // clears memory through MemoryAccessor
+            this.memoryAccessor.clearMemory();
+            this.pcbs = []; // resets the PCBs array
+            // marks all partitions as available
+            this.availablePartitions.fill(true);
+        }
     }
     TSOS.MemoryManager = MemoryManager;
 })(TSOS || (TSOS = {}));
