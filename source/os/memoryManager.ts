@@ -43,9 +43,17 @@ module TSOS {
             const partition = this.findAvailablePartition(); // to find a partition
             const baseAddress = this.getBaseAddress(partition); // gets the base address to know where to start loading the program in
             const limitAddress = baseAddress + 256; // Each partition is 256 bytes
-        
+
+            // ensures only three processes can be loaded 
+            if (this.pcbs.length >= 3) 
+            {
+                console.log("Maximum process limit reached");
+                return null;
+            }
+
+
             // checks if the program length exceeds the partition size and if so it says so 
-            if (program.length > 256) 
+            else if (program.length > 256) 
             {
                 console.log("Program size exceeds partition size.");
             }

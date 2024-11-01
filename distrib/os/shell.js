@@ -69,8 +69,11 @@ var TSOS;
             // clear's all memory
             sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", "clears all memory segments");
             this.commandList[this.commandList.length] = sc;
-            // bsod
+            // ps
             sc = new TSOS.ShellCommand(this.shellps, "ps", "displays the PID and state of all processes");
+            this.commandList[this.commandList.length] = sc;
+            // bsod
+            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
             // ps  - list the running processes and their IDs
             // kill <id> - kills the specified process id.

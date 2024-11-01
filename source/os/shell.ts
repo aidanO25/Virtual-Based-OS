@@ -122,10 +122,16 @@ module TSOS {
                                     "clears all memory segments");
             this.commandList[this.commandList.length] = sc;
 
-            // bsod
+            // ps
             sc = new ShellCommand(this.shellps, 
                                     "ps", 
                                     "displays the PID and state of all processes");
+            this.commandList[this.commandList.length] = sc;
+
+             // bsod
+             sc = new ShellCommand(this.shellkill, 
+                                    "kill", 
+                                    "<pid> displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
