@@ -39,11 +39,20 @@
             public loadPCB(pcb: PCB): void 
             {
                 this.pcb = pcb;
-                if (pcb.PC < pcb.base || pcb.PC >= pcb.limit) // this makes sure the PC is within the process's memory bounds 
+
+                // this makes sure the PC is within the process's memory bounds 
+                if (pcb.PC < pcb.base || pcb.PC >= pcb.limit)
                 {
                     _Kernel.krnTrace(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
                     this.isExecuting = false;
                 }
+
+                // sets the start time as the first time the PCB is loaded
+                if (!pcb.startTime) 
+                {
+                    pcb.startTime = Date.now(); 
+                }
+
                 this.PC = pcb.PC;
                 this.Acc = pcb.ACC;
                 this.Xreg = pcb.Xreg;
@@ -83,10 +92,24 @@
                     
                     // decode and execute
                     this.executeInstruction(instruction);
-                    // debug, can get rid of this and should for final commit
-                    //_StdOut.putText(`Executed: ${instruction.toString(16).toUpperCase()}`);
-                    //_StdOut.putText(`| PC: ${this.PC} | Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
-                    //_StdOut.advanceLine();
+                    this.pcb.cpuBurstTime += 1;
+                    
+                    // to tell when a process has completed along with calculating turnaround and wait time once completd
+                    if(instruction === 0x00)
+                    {
+                        // changing the pcb state to terminated
+                        this.pcb.state = "Terminated";
+
+                        // sets the completion time to the current time
+                        this.pcb.completionTime = Date.now();
+
+                        // calculating turnaround and wait time
+                        const turnaroundTime = this.pcb.completionTime - this.pcb.arrivalTime;
+                        const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
+
+                        // displays turnaround time
+                        _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                    }
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
@@ -185,7 +208,6 @@
 
                     case 0x00: // break (System call) I assume we just stop executing and increment the program counter
                         this.isExecuting = false;
-                        this.PC++;
                         break;
 
                     case 0xEC: // compare a byte in memory to the X register

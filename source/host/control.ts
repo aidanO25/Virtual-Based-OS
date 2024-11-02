@@ -191,6 +191,8 @@ module TSOS {
                     row.insertCell(6).innerText = pcb.Xreg.toString();
                     row.insertCell(7).innerText = pcb.Yreg.toString();
                     row.insertCell(8).innerText = pcb.Zflag.toString();
+                    row.insertCell(9).innerText = pcb.base.toString();
+                    row.insertCell(10).innerText = pcb.limit.toString();
                 }
             });
         }

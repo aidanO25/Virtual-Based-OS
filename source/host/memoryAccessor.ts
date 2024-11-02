@@ -45,7 +45,7 @@ module TSOS
         public clearMemory(): void 
         {
             for (let address = 0; address < this.memory.size; address++) 
-                {
+            {
                 this.write(address, 0);
             }
         }
