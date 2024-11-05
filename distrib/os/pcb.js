@@ -17,10 +17,10 @@ var TSOS;
         location; // process location
         priority; // process priority 
         // for tracking process turnaround time (thank you for offering +10)
-        arrivalTime; // When the process is added to the ready queue
-        startTime = null; // When the process first gets the CPU
-        completionTime = null; // When the process completes
-        cpuBurstTime = 0;
+        arrivalTime; // the time a process is added to the ready que
+        startTime = null; // when the process first gets the CPU  
+        completionTime = null; // when the process completes
+        cpuBurstTime = 0; // time incremented each cycle
         constructor(pid, base, limit, priority = 0) {
             this.PID = pid;
             this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
@@ -33,6 +33,7 @@ var TSOS;
             this.state = "Resident"; // default is resident (but can change to ready, running, or terminated)
             this.location = "0"; // default location is 0, but can be 1 or 2
             this.priority = priority; // Default priority is 0
+            // for turnaround and wait time caculation
             this.arrivalTime = Date.now();
         }
     }

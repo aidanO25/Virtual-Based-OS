@@ -44,13 +44,14 @@ var TSOS;
         // loads the current pcb into the cpu
         loadPCB(pcb) {
             this.pcb = pcb;
-            if (pcb.PC < pcb.base || pcb.PC >= pcb.limit) // this makes sure the PC is within the process's memory bounds 
-             {
+            // this makes sure the PC is within the process's memory bounds 
+            if (pcb.PC < pcb.base || pcb.PC >= pcb.limit) {
                 _Kernel.krnTrace(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
                 this.isExecuting = false;
             }
+            // sets the start time as the first time the PCB is loaded
             if (!pcb.startTime) {
-                pcb.startTime = Date.now(); // Set start time the first time the PCB is loaded
+                pcb.startTime = Date.now();
             }
             this.PC = pcb.PC;
             this.Acc = pcb.ACC;
@@ -83,7 +84,7 @@ var TSOS;
                 // decode and execute
                 this.executeInstruction(instruction);
                 this.pcb.cpuBurstTime += 1;
-                // to tell when a process has completed
+                // to tell when a process has completed along with calculating turnaround and wait time once completd
                 if (instruction === 0x00) {
                     // changing the pcb state to terminated
                     this.pcb.state = "Terminated";
@@ -94,6 +95,7 @@ var TSOS;
                     const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
                     // displays turnaround time
                     _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                    // use advance line funciton
                 }
                 TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                 TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
@@ -175,7 +177,11 @@ var TSOS;
                     this.PC++; // just in incrementing the program counter
                     break;
                 case 0x00: // break (System call) I assume we just stop executing and increment the program counter
-                    this.isExecuting = false;
+                    this.PC++;
+                    if (this.memoryAccessor.read(this.PC) === 0x00) {
+                        this.PC--;
+                        this.isExecuting = false;
+                    }
                     break;
                 case 0xEC: // compare a byte in memory to the X register
                     this.PC++; // increment the pc to get the low byte of the mem address
@@ -188,11 +194,13 @@ var TSOS;
                     this.PC++; // moves to the next operand
                     break;
                 case 0xD0: // branch if Z flag is equal to 0
-                    this.PC++; // increments the pc counter to get the branch offset 
+                    // increments the pc counter to get the branch offset 
+                    this.PC++;
                     if (this.Zflag === 0) {
                         // if the z flag is 0, add the branch offset to the pc
                         const branchValue = this.memoryAccessor.read(this.PC);
-                        this.PC += branchValue; // adds the branch offset to the pc
+                        this.PC = this.PC + branchValue;
+                        alert(branchValue);
                     }
                     else {
                         // otherwise just skip the branch operand
@@ -239,4 +247,6 @@ var TSOS;
     }
     TSOS.Cpu = Cpu;
 })(TSOS || (TSOS = {}));
+//branch forward:  d0 03 a9 05 ea a9 07 00
+// branch backward: a9 07 ea d0 fb ea 00
 //# sourceMappingURL=cpu.js.map
