@@ -49,6 +49,7 @@ var TSOS;
                 _Kernel.krnTrace(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
                 this.isExecuting = false;
             }
+            this.pcb.state = "running";
             // sets the start time as the first time the PCB is loaded
             if (!pcb.startTime) {
                 pcb.startTime = Date.now();

@@ -128,10 +128,16 @@ module TSOS {
                                     "displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
 
-             // bsod
+             // kill
              sc = new ShellCommand(this.shellkill, 
                                     "kill", 
                                     "<pid> kills a process");
+            this.commandList[this.commandList.length] = sc;
+
+            // kill
+            sc = new ShellCommand(this.shellrunall, 
+                "runall", 
+                "runs all processes");
             this.commandList[this.commandList.length] = sc;
 
             // ps  - list the running processes and their IDs
@@ -348,6 +354,9 @@ module TSOS {
                         _StdOut.putText("displays the PID and state of all processes");
                     case "kill":
                         _StdOut.putText("kills one process");
+                        break;
+                    case "runall":
+                        _StdOut.putText("runs all processes");
                         break;
 
 
@@ -604,6 +613,32 @@ module TSOS {
         
             // update the PCB display  to show it's termination
             TSOS.Control.updatePcbDisplay();
+        }
+
+        // runs all processes 
+        public shellrunall(): void 
+        {
+            // gets all PCBs
+            const pcbs = _MemoryManager.getAllPCBs();
+        
+            // makes sure there are programs loaded
+            if (pcbs.length === 0) 
+            {
+                _StdOut.putText("No programs loaded.");
+                return;
+            }
+        
+            // sets all non terminated processes to waiting
+            for (let i = 0; i < pcbs.length; i++) 
+            {
+                if (pcbs[i].state !== "Terminated") 
+                {
+                    pcbs[i].state = "Waiting";
+                }
+            }
+        
+            _StdOut.putText("All loaded programs are now running.");
+            TSOS.Control.updatePcbDisplay(); // to update the ready que (originally titled pcb display)
         }
     }
 }

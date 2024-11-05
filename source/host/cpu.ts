@@ -47,6 +47,8 @@
                     this.isExecuting = false;
                 }
 
+                this.pcb.state = "running";
+
                 // sets the start time as the first time the PCB is loaded
                 if (!pcb.startTime) 
                 {
@@ -128,7 +130,7 @@
                 }
 
             }
-            
+
             // these are the instructions from the 6502alan Machine language Instruction Set
             public executeInstruction(instruction: number): void 
             {
