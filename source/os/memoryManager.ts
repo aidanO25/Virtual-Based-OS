@@ -8,16 +8,18 @@ module TSOS {
     export class MemoryManager {
         private memoryAccessor: MemoryAccessor;
         private nextPID: number; // to keep track of the next available PID
-        private proessResidentList: PCB[]; // an array to store PCBs
-        private readyQueue: PCB[] = []; //processes that are ready to execute
+
+        private processResidentList: PCB[]; // an array to store PCBs
+        public readyQueue: PCB[] = []; //processes that are ready to execute.
+
         private partitions: number = 3; // number of memory partitions (0, 1, 2)
         private availablePartitions: boolean[]; // keeps track of available partitions as truth values
 
         constructor(memoryAccessor: MemoryAccessor) {
             this.memoryAccessor = memoryAccessor;
             this.nextPID = 0;
-            this.proessResidentList = []; // this is my resident list
-            this.readyQueue = [];
+            this.processResidentList = []; // this is my resident list
+            this.readyQueue = []; // this is the ready que used in context switching 
             this.availablePartitions = new Array(this.partitions).fill(true); // all partitions start as usasable 
         }
 
@@ -37,7 +39,7 @@ module TSOS {
                     return i;
                 }
             }
-            console.log("No available partitions.");
+            _StdOut.putText("No available partitions.");
         }
         
         public loadProgram(program: number[]): number 
@@ -47,9 +49,9 @@ module TSOS {
             const limitAddress = baseAddress + 256; // Each partition is 256 bytes
 
             // ensures only three processes can be loaded 
-            if (this.proessResidentList.length >= 3) 
+            if (this.processResidentList.length >= 3) 
             {
-                console.log("Maximum process limit reached");
+                _StdOut.putText("Maximum process limit reached");
                 return null;
             }
 
@@ -57,7 +59,7 @@ module TSOS {
             // checks if the program length exceeds the partition size and if so it says so 
             else if (program.length > 256) 
             {
-                console.log("Program size exceeds partition size.");
+                _StdOut.putText("Program size exceeds partition size.");
             }
         
             // loads the program into memory
@@ -69,13 +71,23 @@ module TSOS {
             // creates a new PCB for the process with the right base and limit addresses
             const pcb = new PCB(this.nextPID++, baseAddress, limitAddress);
 
-            this.proessResidentList.push(pcb); // adds the pcb to the proces resident list
+            this.processResidentList.push(pcb); // adds the pcb to the proces resident list
             this.readyQueue.push(pcb); // adds it to the ready queue if it's in the ready state
             pcb.state = "Ready";
 
             this.availablePartitions[partition] = false; // marks the partition as taken
         
-            console.log(`Program loaded into memory with PID ${pcb.PID}`);
+            // Debugging output
+            _StdOut.putText(`Program loaded into memory with PID ${pcb.PID}`);
+            /*
+            _StdOut.advanceLine();
+            _StdOut.putText(`processResidentList length: ${this.processResidentList.length}`);
+            _StdOut.advanceLine();
+            _StdOut.putText(`readyQueue length: ${this.readyQueue.length}`);
+            _StdOut.advanceLine();
+            */
+
+
             TSOS.Control.updatePcbDisplay();
             return pcb.PID; // returns the program's process ID
         }
@@ -83,18 +95,18 @@ module TSOS {
         // retrieves a PCB by its PID
         public getPCB(pid: number): PCB | undefined
         {
-            return this.proessResidentList.find(pcb => pcb.PID === pid);
+            return this.processResidentList.find(pcb => pcb.PID === pid);
         }
 
         // this is for updating the pcb dispaly used by console.ts
         public getAllPIDs(): number[] {
-            return this.proessResidentList.map(pcb => pcb.PID);
+            return this.processResidentList.map(pcb => pcb.PID);
         }
 
         // gets all PCBs (really to just display each process wiht teh shell command ps)
         public getAllPCBs(): PCB[]
         {
-            return this.proessResidentList;
+            return this.processResidentList;
         }
 
         // clears all instances of memory
@@ -103,7 +115,7 @@ module TSOS {
             // clears memory through MemoryAccessor
             this.memoryAccessor.clearMemory();
 
-            this.proessResidentList = []; // resets the PCBs array
+            this.processResidentList = []; // resets the PCBs array
         
             // marks all partitions as available
             this.availablePartitions.fill(true);
@@ -112,9 +124,3 @@ module TSOS {
 
     }
 }
-
-/* Commenting int order to push a note about my base and limit's 
- I deleted what I had been working on just so you weren't confused
- on what the commit was for. Just see the description if you havn't already
-
- */

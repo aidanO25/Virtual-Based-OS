@@ -95,7 +95,7 @@ module TSOS {
             Control.hostLog("Initializing memory");
             _Memory = new TSOS.Memory(768);  // increased memory size to allow for partitions
             Control.hostLog("Initializing memory accessor");
-            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory);  // Create MemoryAccessor to manage memory
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory, _MemoryManager);  // Create MemoryAccessor to manage memory
             Control.hostLog("Memory set up");
 
             // .. and call the OS Kernel Bootstrap routine.

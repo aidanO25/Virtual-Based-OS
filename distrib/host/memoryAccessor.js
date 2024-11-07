@@ -6,10 +6,12 @@ var TSOS;
 (function (TSOS) {
     class MemoryAccessor {
         memory;
+        memoryManager;
         base;
         limit;
-        constructor(memory) {
+        constructor(memory, memoryManager) {
             this.memory = memory;
+            this.memoryManager = memoryManager;
         }
         // sets the base and limit for the current process
         setBounds(base, limit) {

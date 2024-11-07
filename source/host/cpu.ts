@@ -14,6 +14,8 @@
      module TSOS {
 
         export class Cpu {
+            private quantumCounter: number = 0; // for scheduling 
+            private currentProcessIndex: number; //tracks the index of the current process in readyQueue
     
             constructor(public PC: number = 0,
                         public Acc: number = 0,
@@ -23,7 +25,8 @@
                         private memoryAccessor: MemoryAccessor = null, // reference to MemoryAccessor
                         private pcb: PCB = null, // reference to the CURRENT PCB 
                         public isExecuting: boolean = false) {
-    
+                            this.currentProcessIndex = 0;
+                            this.quantumCounter = 0;
             }
     
             public init(): void {
@@ -74,6 +77,7 @@
                     this.pcb.Xreg = this.Xreg;
                     this.pcb.Yreg = this.Yreg;
                     this.pcb.Zflag = this.Zflag;
+                    this.pcb.state = "Waiting"; // comes up when scheduling takes place 
                 }
             }
 
@@ -85,6 +89,7 @@
             public cycle(): void 
             {
                 _Kernel.krnTrace('CPU cycle');
+                this.pcb.state = "running";
                 
                 // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
                 if (this.memoryAccessor && this.isExecuting) 
@@ -94,9 +99,18 @@
                     
                     // decode and execute
                     this.executeInstruction(instruction);
-                    this.pcb.cpuBurstTime += 1;
+                    this.pcb.cpuBurstTime += 1; // for wait time calculation
+                    this.quantumCounter++; // for round robbin scheduling 
+
+                    // keeps track of the quantum counter and if it reaches 6 it context switches
+                    if (this.quantumCounter >= 6) 
+                    {
+                        this.quantumCounter = 0; // resets counter for the next process
+                        this.switchProcess(); // triggers a context switch
+                    }
                     
                     // to tell when a process has completed along with calculating turnaround and wait time once completd
+                    // this is deffinetly going to have to change, but it's just here for now
                     if(instruction === 0x00)
                     {
                         // changing the pcb state to terminated
@@ -110,18 +124,19 @@
                         const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
 
                         // displays turnaround time
-                        _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                        //_StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
                         // use advance line funciton
                     }
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
-                    TSOS.Control.updatePcbDisplay(); // updates the PCB display
+                    
 
                     // saves the current state of the pcb
                     this.savePCB();
+                    TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
-                    // checks if single step mode has been activated
+                    // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                     if (TSOS.Control.singleStepMode) 
                     {
                         // if so, execute one instruction and then stop execution
@@ -129,6 +144,47 @@
                     }
                 }
 
+            }
+
+            // scheduler
+            public switchProcess(): void 
+            {
+                this.isExecuting = false; // temporarily stops execution during switch
+            
+                // saves the current PCB state 
+                if (this.pcb) 
+                {
+                    this.savePCB();
+                    if (this.pcb.state !== "Terminated") 
+                    {
+                        this.pcb.state = "Waiting";
+                    }
+                }
+            
+                // proceeds only if there are processes in the queue (there should be if you loaded a program)
+                if (_MemoryManager.readyQueue.length > 0) 
+                {
+                    // calculate the new current process index and retrieve the next PCB (this i had chat help with)
+                    // yes i am also awaare that we should be using memoryAccessor instead of talking right with memory manager, but this is mainly just for testing purposes
+                    // I'll switch it later. It is just iterating through the readyQueue.
+                    this.currentProcessIndex = (this.currentProcessIndex + 1) % _MemoryManager.readyQueue.length;
+                    const nextPCB = _MemoryManager.readyQueue[this.currentProcessIndex];
+            
+                    // laods the next PCB
+                    this.loadPCB(nextPCB);
+            
+                    // changes the state to executing
+                    nextPCB.state = "Executing";
+                    this.quantumCounter = 0; // resets quantum counter
+                    this.isExecuting = true; // switches the cpu to start execution again
+                } 
+                // otherwise if there are no processes in the que it just says so
+                else 
+                {
+                    _StdOut.putText("No more processes in queue to execute");
+                }
+            
+                TSOS.Control.updatePcbDisplay(); // Update PCB display
             }
 
             // these are the instructions from the 6502alan Machine language Instruction Set

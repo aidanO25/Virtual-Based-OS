@@ -500,10 +500,11 @@ module TSOS {
 
                 if (isValid) 
                 {
-                    TSOS.Control.updateMemoryDisplay(false);
+                    TSOS.Control.updateMemoryDisplay();
                     const pid = _MemoryManager.loadProgram(program); // loads a program into memory
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
-                    _StdOut.putText(`Program loaded with PID: ${pid}`);
+                    //_StdOut.putText(`Program loaded with PID: ${pid}`);
+                    
                 } 
                 else 
                 {
@@ -616,29 +617,23 @@ module TSOS {
         }
 
         // runs all processes 
-        public shellrunall(): void 
-        {
-            // gets all PCBs
-            const pcbs = _MemoryManager.getAllPCBs();
+        public shellrunall(args: string[]): void {
+            // Check if there are any PCBs in the ready queue
+            _StdOut.putText("test");
+            const nextPCB = _MemoryManager.readyQueue[0];
         
-            // makes sure there are programs loaded
-            if (pcbs.length === 0) 
-            {
-                _StdOut.putText("No programs loaded.");
-                return;
+            if (nextPCB) {
+                // Load the first process in the ready queue into the CPU and start execution
+                _CPU.loadPCB(nextPCB);
+                _CPU.isExecuting = true;
+                nextPCB.state = "Executing";
+                _StdOut.putText("All loaded programs are now set to run.");
+            } else {
+                _StdOut.putText("No programs loaded in the ready queue.");
             }
         
-            // sets all non terminated processes to waiting
-            for (let i = 0; i < pcbs.length; i++) 
-            {
-                if (pcbs[i].state !== "Terminated") 
-                {
-                    pcbs[i].state = "Waiting";
-                }
-            }
-        
-            _StdOut.putText("All loaded programs are now running.");
-            TSOS.Control.updatePcbDisplay(); // to update the ready que (originally titled pcb display)
+            TSOS.Control.updatePcbDisplay(); // Update the PCB display in the UI
+            TSOS.Control.updateMemoryDisplay();
         }
     }
 }
