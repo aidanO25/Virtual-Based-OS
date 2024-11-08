@@ -433,6 +433,7 @@ var TSOS;
         }
         // This is the shell command to run a program from memory per its PID
         shellRun(args) {
+            _CPU.setScheduler(false);
             if (args.length > 0) {
                 const pid = parseInt(args[0]);
                 // Fetch the PCB using the MemoryManager based on the input pid
@@ -497,23 +498,19 @@ var TSOS;
             // update the PCB display  to show it's termination
             TSOS.Control.updatePcbDisplay();
         }
-        // runs all processes 
-        shellrunall(args) {
-            // Check if there are any PCBs in the ready queue
-            _StdOut.putText("test");
-            const nextPCB = _MemoryManager.readyQueue[0];
-            if (nextPCB) {
-                // Load the first process in the ready queue into the CPU and start execution
-                _CPU.loadPCB(nextPCB);
+        // runs all programs within the resident list using round robin scheduling with a q of 6 (soon to be "or a user defined quantum");
+        shellrunall() {
+            if (_MemoryManager.readyQueue.length > 0) {
+                // sets the scheduling flag to true within the cpu class to allow for scheduling 
+                _CPU.setScheduler(true);
+                _StdOut.putText("Running all loaded programs...");
+                // starts executing with the first process in the que
+                _Scheduler.scheduleNextProcess();
                 _CPU.isExecuting = true;
-                nextPCB.state = "Executing";
-                _StdOut.putText("All loaded programs are now set to run.");
             }
             else {
-                _StdOut.putText("No programs loaded in the ready queue.");
+                _StdOut.putText("No programs loaded to run.");
             }
-            TSOS.Control.updatePcbDisplay(); // Update the PCB display in the UI
-            TSOS.Control.updateMemoryDisplay();
         }
     }
     TSOS.Shell = Shell;

@@ -11,6 +11,7 @@
 var _Memory;
 var _MemoryAccessor;
 var _MemoryManager;
+var _Scheduler;
 var _CPU;
 var TSOS;
 (function (TSOS) {
@@ -26,6 +27,9 @@ var TSOS;
             this.krnTrace("Initializing CPU.");
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
+            this.krnTrace("initializing scheduler");
+            _Scheduler = new TSOS.Scheduler(_MemoryManager, _CPU);
+            this.krnTrace("scheduler initialized");
             // Initialize our global queues.
             _KernelInterruptQueue = new TSOS.Queue(); // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array(); // Buffers... for the kernel.

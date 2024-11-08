@@ -12,6 +12,7 @@
 var _Memory: TSOS.Memory;
 var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager: TSOS.MemoryManager;
+var _Scheduler: TSOS.Scheduler;
 var _CPU: TSOS.Cpu;
 
 module TSOS {
@@ -32,6 +33,12 @@ module TSOS {
             this.krnTrace("Initializing CPU.");
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
+
+            
+            this.krnTrace("initializing scheduler");
+            _Scheduler = new TSOS.Scheduler(_MemoryManager, _CPU);
+            this.krnTrace("scheduler initialized");
+            
 
 
             // Initialize our global queues.

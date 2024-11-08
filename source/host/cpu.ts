@@ -14,8 +14,8 @@
      module TSOS {
 
         export class Cpu {
-            private quantumCounter: number = 0; // for scheduling 
-            private currentProcessIndex: number; //tracks the index of the current process in readyQueue
+            // indicates whether or not we use the scheduler or not (only when we use runall)
+            private schedulerFlag: boolean = false;
     
             constructor(public PC: number = 0,
                         public Acc: number = 0,
@@ -23,10 +23,8 @@
                         public Yreg: number = 0,
                         public Zflag: number = 0,
                         private memoryAccessor: MemoryAccessor = null, // reference to MemoryAccessor
-                        private pcb: PCB = null, // reference to the CURRENT PCB 
+                        public pcb: PCB = null, // reference to the CURRENT PCB 
                         public isExecuting: boolean = false) {
-                            this.currentProcessIndex = 0;
-                            this.quantumCounter = 0;
             }
     
             public init(): void {
@@ -46,17 +44,12 @@
                 // this makes sure the PC is within the process's memory bounds 
                 if (pcb.PC < pcb.base || pcb.PC >= pcb.limit)
                 {
-                    _Kernel.krnTrace(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
+                    _StdOut.putText(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
                     this.isExecuting = false;
                 }
 
+                // changing the state to running once it's been loaded into the the cpu
                 this.pcb.state = "running";
-
-                // sets the start time as the first time the PCB is loaded
-                if (!pcb.startTime) 
-                {
-                    pcb.startTime = Date.now(); 
-                }
 
                 this.PC = pcb.PC;
                 this.Acc = pcb.ACC;
@@ -64,11 +57,20 @@
                 this.Yreg = pcb.Yreg;
                 this.Zflag = pcb.Zflag;
                 this.memoryAccessor.setBounds(pcb.base, pcb.limit);
+
+                // sets the start time as the first time the PCB is loaded
+                // Moved this to after the values are set because the process really wouldn't have been loaded yet
+                if (!pcb.startTime) 
+                {
+                    pcb.startTime = Date.now(); 
+                }
+
+                // starts cycling 
                 this.isExecuting = true;
             }
 
             // saves the current state of the CPU back into the PCB
-            private savePCB(): void 
+            public savePCB(): void 
             {
                 if (this.pcb) 
                 {
@@ -77,11 +79,11 @@
                     this.pcb.Xreg = this.Xreg;
                     this.pcb.Yreg = this.Yreg;
                     this.pcb.Zflag = this.Zflag;
-                    this.pcb.state = "Waiting"; // comes up when scheduling takes place 
                 }
             }
 
-            public getCurrentPCB(): PCB | null {
+            public getCurrentPCB(): PCB | null 
+            {
                 return this.pcb;
             }
     
@@ -100,17 +102,11 @@
                     // decode and execute
                     this.executeInstruction(instruction);
                     this.pcb.cpuBurstTime += 1; // for wait time calculation
-                    this.quantumCounter++; // for round robbin scheduling 
-
-                    // keeps track of the quantum counter and if it reaches 6 it context switches
-                    if (this.quantumCounter >= 6) 
-                    {
-                        this.quantumCounter = 0; // resets counter for the next process
-                        this.switchProcess(); // triggers a context switch
-                    }
                     
+    
                     // to tell when a process has completed along with calculating turnaround and wait time once completd
                     // this is deffinetly going to have to change, but it's just here for now
+                    
                     if(instruction === 0x00)
                     {
                         // changing the pcb state to terminated
@@ -136,6 +132,12 @@
                     this.savePCB();
                     TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
+                     // context switchest if we use runall command
+                     if(this.schedulerFlag)
+                        {
+                            _Scheduler.manageQuantum();
+                        }
+
                     // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                     if (TSOS.Control.singleStepMode) 
                     {
@@ -143,48 +145,12 @@
                         this.isExecuting = false;
                     }
                 }
-
             }
 
-            // scheduler
-            public switchProcess(): void 
+            // enable or disable the shceduler
+            public setScheduler(value: boolean)
             {
-                this.isExecuting = false; // temporarily stops execution during switch
-            
-                // saves the current PCB state 
-                if (this.pcb) 
-                {
-                    this.savePCB();
-                    if (this.pcb.state !== "Terminated") 
-                    {
-                        this.pcb.state = "Waiting";
-                    }
-                }
-            
-                // proceeds only if there are processes in the queue (there should be if you loaded a program)
-                if (_MemoryManager.readyQueue.length > 0) 
-                {
-                    // calculate the new current process index and retrieve the next PCB (this i had chat help with)
-                    // yes i am also awaare that we should be using memoryAccessor instead of talking right with memory manager, but this is mainly just for testing purposes
-                    // I'll switch it later. It is just iterating through the readyQueue.
-                    this.currentProcessIndex = (this.currentProcessIndex + 1) % _MemoryManager.readyQueue.length;
-                    const nextPCB = _MemoryManager.readyQueue[this.currentProcessIndex];
-            
-                    // laods the next PCB
-                    this.loadPCB(nextPCB);
-            
-                    // changes the state to executing
-                    nextPCB.state = "Executing";
-                    this.quantumCounter = 0; // resets quantum counter
-                    this.isExecuting = true; // switches the cpu to start execution again
-                } 
-                // otherwise if there are no processes in the que it just says so
-                else 
-                {
-                    _StdOut.putText("No more processes in queue to execute");
-                }
-            
-                TSOS.Control.updatePcbDisplay(); // Update PCB display
+                this.schedulerFlag = value;
             }
 
             // these are the instructions from the 6502alan Machine language Instruction Set
