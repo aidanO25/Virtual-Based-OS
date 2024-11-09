@@ -27,6 +27,7 @@ var TSOS;
             this.krnTrace("Initializing CPU.");
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
+            // adding the scheduler to the kernel
             this.krnTrace("initializing scheduler");
             _Scheduler = new TSOS.Scheduler(_MemoryManager, _CPU);
             this.krnTrace("scheduler initialized");

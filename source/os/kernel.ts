@@ -34,13 +34,12 @@ module TSOS {
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
 
-            
+            // adding the scheduler to the kernel
             this.krnTrace("initializing scheduler");
             _Scheduler = new TSOS.Scheduler(_MemoryManager, _CPU);
             this.krnTrace("scheduler initialized");
             
-
-
+            
             // Initialize our global queues.
             _KernelInterruptQueue = new Queue();  // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array();         // Buffers... for the kernel.

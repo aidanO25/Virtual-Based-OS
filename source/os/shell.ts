@@ -122,26 +122,29 @@ module TSOS {
                                     "clears all memory segments");
             this.commandList[this.commandList.length] = sc;
 
-            // ps
+            // displays the pid and state of all processes
             sc = new ShellCommand(this.shellps, 
                                     "ps", 
                                     "displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
 
-             // kill
+             // kills a process
              sc = new ShellCommand(this.shellkill, 
                                     "kill", 
                                     "<pid> kills a process");
             this.commandList[this.commandList.length] = sc;
 
-            // kill
+            // runs all processes within the ready queue
             sc = new ShellCommand(this.shellrunall, 
                 "runall", 
                 "runs all processes");
             this.commandList[this.commandList.length] = sc;
 
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // set's the quantum
+            sc = new ShellCommand(this.shellquantum, 
+                "quantum", 
+                "<int> lets the user set the Round Robin quantum");
+            this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
             this.putPrompt();
@@ -357,6 +360,8 @@ module TSOS {
                         break;
                     case "runall":
                         _StdOut.putText("runs all processes");
+                    case "quantum":
+                        _StdOut.putText("sets the quantum for Round Robin scheduling");
                         break;
 
 
@@ -633,6 +638,27 @@ module TSOS {
             else 
             {
                 _StdOut.putText("No programs loaded to run.");
+            }
+        }
+
+        // lets the user set the round robin quantum
+        public shellquantum(args: string[]): void
+        {
+            if(args.length > 0)
+            {
+                // sets the quantum to be the number input
+                const quantum = parseInt(args[0])
+                
+                // checking the input is a valid number
+                if(!isNaN(quantum) && quantum > 0)
+                {
+                    _Scheduler.setQuantum(quantum); // sets the scheduler quantum
+                    _StdOut.putText(`Quantum has been set to ${quantum} cycles.`)
+                }
+            }
+            else
+            {
+                _StdOut.putText("quantum must be a postive integer");
             }
         }
     }
