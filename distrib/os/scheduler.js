@@ -29,13 +29,8 @@ var TSOS;
             }
         }
         // starts/continues scheduling using round robin scheduling 
+        // I had slight chat help with comming up with a process of iterating through the readyQueue 
         scheduleNextProcess() {
-            // only continues if there are processes in the ready queue
-            if (this.memoryManager.readyQueue.length === 0) {
-                _StdOut.putText("No processes available to schedule.");
-                _CPU.isExecuting = false;
-                return;
-            }
             // advances to the next non-terminated process in the ready queue
             while (this.memoryManager.readyQueue.length > 0) {
                 const nextPCB = this.memoryManager.readyQueue[this.currentProcessIndex];
@@ -45,18 +40,20 @@ var TSOS;
                     // if removing the terminated process leaves no processes, stop the CPU
                     // this is really for a case in which there is only one process in the queue and kill<pid> is called 
                     if (this.memoryManager.readyQueue.length === 0) {
-                        _StdOut.putText("All processes terminated. Stopping CPU.");
+                        _StdOut.putText("All processes terminated. Halting CPU.");
                         _CPU.isExecuting = false;
-                        return;
                     }
+                    // adjusts the curentProcessIndex to stay within bounds of the modified queue 
+                    this.currentProcessIndex %= this.memoryManager.readyQueue.length;
                 }
                 else {
                     this.dispatchProcess(nextPCB);
-                    break;
+                    return;
                 }
-                // goes to the next process in the queue
-                this.currentProcessIndex = (this.currentProcessIndex + 1) % this.memoryManager.readyQueue.length;
             }
+            // if no runnable processe are found stop the cpu
+            _StdOut.putText("No runnable processes left. Halting CPU.");
+            _CPU.isExecuting = false;
         }
         // dispatches a process to the CPu
         dispatchProcess(pcb) {

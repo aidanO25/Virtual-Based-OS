@@ -102,8 +102,9 @@ var TSOS;
                     const turnaroundTime = this.pcb.completionTime - this.pcb.arrivalTime;
                     const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
                     // displays turnaround time
-                    //_StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
-                    // use advance line funciton
+                    _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                    _StdOut.advanceLine();
+                    _Scheduler.scheduleNextProcess();
                 }
                 TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                 TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle

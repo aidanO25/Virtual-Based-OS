@@ -120,8 +120,10 @@
                         const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
 
                         // displays turnaround time
-                        //_StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
-                        // use advance line funciton
+                        _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                        _StdOut.advanceLine();
+                        _Scheduler.scheduleNextProcess();
+
                     }
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
@@ -133,10 +135,10 @@
                     TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
                      // context switchest if we use runall command
-                     if(this.schedulerFlag)
-                        {
-                            _Scheduler.manageQuantum();
-                        }
+                    if(this.schedulerFlag)
+                    {
+                        _Scheduler.manageQuantum();
+                    }
 
                     // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                     if (TSOS.Control.singleStepMode) 
