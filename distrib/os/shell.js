@@ -496,7 +496,8 @@ var TSOS;
             _StdOut.putText(`Process ${pid} has been terminated.`);
             // if the CPU is executing the process, stop the execution
             if (_CPU.isExecuting && _CPU.getCurrentPCB() && _CPU.getCurrentPCB().PID === pid) {
-                _CPU.isExecuting = false; // Stop the CPU from cycling further
+                // this ensures if there are multiple processes in the queue, continue their execution
+                _Scheduler.scheduleNextProcess();
             }
             // update the PCB display  to show it's termination
             TSOS.Control.updatePcbDisplay();
