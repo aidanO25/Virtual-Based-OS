@@ -24,6 +24,7 @@ module TSOS
         {
             if (address < this.base || address >= this.base + this.limit) {
                 _Kernel.krnTrace(`Memory access violation at address ${address}`);
+                return null;
             }
         }
 
@@ -49,8 +50,5 @@ module TSOS
                 this.write(address, 0);
             }
         }
-
-        // I need functions here so the cpu can communicate with memory manager when context switching.
-        // I havn't quite got it yet so im not including it, but it's in the works 
     }
 }

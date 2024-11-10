@@ -54,12 +54,11 @@ module TSOS {
                 _StdOut.putText("Maximum process limit reached");
                 return null;
             }
-
-
             // checks if the program length exceeds the partition size and if so it says so 
             else if (program.length > 256) 
             {
                 _StdOut.putText("Program size exceeds partition size.");
+                return null; // this ensures the program isn't loaded in
             }
         
             // loads the program into memory

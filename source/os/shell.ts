@@ -506,7 +506,7 @@ module TSOS {
                 if (isValid) 
                 {
                     TSOS.Control.updateMemoryDisplay();
-                    const pid = _MemoryManager.loadProgram(program); // loads a program into memory
+                    _MemoryManager.loadProgram(program); // loads a program into memory
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     //_StdOut.putText(`Program loaded with PID: ${pid}`);
                     

@@ -123,7 +123,6 @@
                         _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
                         _StdOut.advanceLine();
                         _Scheduler.scheduleNextProcess();
-
                     }
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
