@@ -146,6 +146,12 @@ module TSOS {
                 "<int> lets the user set the Round Robin quantum");
             this.commandList[this.commandList.length] = sc;
 
+             // kills all processes
+             sc = new ShellCommand(this.shellkillall, 
+                "killall", 
+                "kills all processes");
+            this.commandList[this.commandList.length] = sc;
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -362,6 +368,8 @@ module TSOS {
                         _StdOut.putText("runs all processes");
                     case "quantum":
                         _StdOut.putText("sets the quantum for Round Robin scheduling");
+                    case "killall":
+                        _StdOut.putText("kills all processes");
                         break;
 
 
@@ -661,6 +669,26 @@ module TSOS {
             {
                 _StdOut.putText("quantum must be a postive integer");
             }
+        }
+
+        // lets the user set the round robin quantum
+        public shellkillall()
+        {
+            // gets all pcbs 
+            const allPCBs = _MemoryManager.getAllPCBs();
+        
+            // makrs each pcb as terminated 
+            for (let i = 0; i < allPCBs.length; i++) 
+            {
+                allPCBs[i].state = "Terminated";
+            }
+
+            // stops cpu execution
+            _CPU.isExecuting = false;
+        
+            // updates the pcb display to show the pcb terminated state
+            TSOS.Control.updatePcbDisplay();
+            _StdOut.putText("All processes have been terminated.");
         }
     }
 }
