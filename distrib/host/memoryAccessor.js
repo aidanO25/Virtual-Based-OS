@@ -19,8 +19,46 @@ var TSOS;
             this.limit = limit;
         }
         // checks if the address is within the base and limit bounds
-        // this needs to change. I'm not sure if it's problems with this other than having to stop the process,
-        // but I think it has something to do with either the address being retrieved, or somthing to do with the pcb contents.
+        // Im able to properly enfource bounds for once process, however when context switching there is always 
+        // an access violation at address 236. whether its process one or two, it will always say 236 or 237 even
+        // when the address is being read within the allocated partition. I've added debugging and all, but can't seem to figure out the issue
+        /* I have this commented out so you can see I am able to context switch, but to test it on running once proces to see if I am enforcing memory bounds just uncomment it
+        private checkMemoryBounds(address: number): boolean
+        {
+            if (address < this.base || address >= this.base + this.limit)
+            {
+                _StdOut.advanceLine();
+                _StdOut.putText(`Checking bounds: Address - ${address}, Base - ${this.base}, Limit - ${this.limit}`);
+                _StdOut.advanceLine();
+                _StdOut.putText(`Memory access violation at address ${address}`);
+                _CPU.pcb.state = "Terminated";
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        // reads a byte from a specific memory address
+        public read(address: number): number
+        {
+            if(this.checkMemoryBounds(address))
+            {
+                return this.memory.getByte(address);
+            }
+        }
+
+        // writes a byte to the designated address
+        public write(address: number, value: number): void
+        {
+            if(this.checkMemoryBounds(address))
+            {
+                this.memory.setByte(address, value);
+            }
+          
+        }
+        */
         checkMemoryBounds(address) {
             if (address < this.base || address >= this.base + this.limit) {
                 //_StdOut.putText(`Memory access violation at address ${address}`);

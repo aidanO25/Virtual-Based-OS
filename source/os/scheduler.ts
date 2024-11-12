@@ -43,6 +43,7 @@ module TSOS
                 else
                 {
                     // removes it from the list and gets the index of the current process
+                    nextPCB.state = "Terminated";
                     this.memoryManager.readyQueue.splice(this.currentProcessIndex, 1); 
                     this.currentProcessIndex %= this.memoryManager.readyQueue.length;
                 }

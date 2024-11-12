@@ -92,21 +92,23 @@
             public cycle(): void 
             {
                 _Kernel.krnTrace('CPU cycle');
-                this.pcb.state = "Running";
                 
                 // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
                 if (this.memoryAccessor && this.isExecuting) 
                 {
+                    this.pcb.state = "Running";
                     // fetch
                     const instruction = this.memoryAccessor.read(this.PC);
-                    //_StdOut.putText(`Executing PID ${this.pcb.PID}: Base - ${this.pcb.base}, Limit - ${this.pcb.limit}`);
+                    //_StdOut.putText(`Executing PID ${this.pcb.PID}: Base - ${this.pcb.base}, Limit - ${this.pcb.limit}`); debug for out of bounds. I would uncomment this if you are looking to trouble shoot
                     //_StdOut.advanceLine();
                     
                     // decode and execute
                     this.executeInstruction(instruction);
                     this.pcb.cpuBurstTime += 1; // for wait time calculation
                     
+                    
                     // this terminates a program if there are no other instrucitons to execute along with displaying turnaround time and wait time
+                    // It still stops on A9 regardless. comment this out to see it print inner1 (it can't go more than that because of instruction issues)
                     if(!instruction)
                     {
                         // changing the pcb state to terminated
@@ -130,6 +132,7 @@
                             _Kernel.initiateContextSwitch();
                         }
                     }
+                    
                         
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
