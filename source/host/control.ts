@@ -221,7 +221,7 @@ module TSOS {
         
                 // inserts the address in the first cell
                 const cellAddress = row.insertCell(0);
-                cellAddress.innerHTML = address.toString(16).toUpperCase().padStart(3, '0'); // displays the address (in hex of course)
+                cellAddress.innerHTML = `0x${address.toString(16).toUpperCase().padStart(2, '0')}`; // ensuring it's displayed in base 16 per note on iproject2
         
                 // insert memory values (use 00 if prepopulating)
                 for (let i = 0; i < valuesPerRow; i++) 
