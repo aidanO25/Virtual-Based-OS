@@ -176,7 +176,7 @@ var TSOS;
                 const row = memoryTable.insertRow(); // Insert a new row
                 // inserts the address in the first cell
                 const cellAddress = row.insertCell(0);
-                cellAddress.innerHTML = `0x${address.toString(16).toUpperCase().padStart(2, '0')}`;
+                cellAddress.innerHTML = `0x${address.toString(16).toUpperCase().padStart(2, '0')}`; // ensuring it's displayed in base 16 per note on iproject2
                 // insert memory values (use 00 if prepopulating)
                 for (let i = 0; i < valuesPerRow; i++) {
                     const memoryCell = row.insertCell(i + 1);
