@@ -72,7 +72,7 @@ module TSOS {
 
             this.processResidentList.push(pcb); // adds the pcb to the proces resident list
             this.readyQueue.push(pcb); // adds it to the ready queue if it's in the ready state
-            pcb.state = "Ready";
+            pcb.state = "New";
 
             this.availablePartitions[partition] = false; // marks the partition as taken
         

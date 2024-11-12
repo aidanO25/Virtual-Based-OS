@@ -44,12 +44,12 @@
                 // this makes sure the PC is within the process's memory bounds 
                 if (pcb.PC < pcb.base || pcb.PC >= pcb.limit)
                 {
-                    _StdOut.putText(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
+                    //_StdOut.putText(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
                     this.isExecuting = false;
                 }
 
                 // changing the state to running once it's been loaded into the the cpu
-                this.pcb.state = "running";
+                this.pcb.state = "Ready";
 
                 this.PC = pcb.PC;
                 this.Acc = pcb.ACC;
@@ -66,6 +66,7 @@
                 }
 
                 // starts cycling 
+                //_StdOut.putText(`Loading PID ${pcb.PID}, setting PC to ${pcb.base}`);
                 this.isExecuting = true;
             }
 
@@ -91,23 +92,22 @@
             public cycle(): void 
             {
                 _Kernel.krnTrace('CPU cycle');
-                this.pcb.state = "running";
+                this.pcb.state = "Running";
                 
                 // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
                 if (this.memoryAccessor && this.isExecuting) 
                 {
                     // fetch
                     const instruction = this.memoryAccessor.read(this.PC);
+                    //_StdOut.putText(`Executing PID ${this.pcb.PID}: Base - ${this.pcb.base}, Limit - ${this.pcb.limit}`);
+                    //_StdOut.advanceLine();
                     
                     // decode and execute
                     this.executeInstruction(instruction);
                     this.pcb.cpuBurstTime += 1; // for wait time calculation
                     
-    
-                    // to tell when a process has completed along with calculating turnaround and wait time once completd
-                    // this is deffinetly going to have to change, but it's just here for now
-                    
-                    if(instruction === 0x00)
+                    // this terminates a program if there are no other instrucitons to execute along with displaying turnaround time and wait time
+                    if(!instruction)
                     {
                         // changing the pcb state to terminated
                         this.pcb.state = "Terminated";
@@ -120,10 +120,17 @@
                         const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
 
                         // displays turnaround time
+                        _StdOut.advanceLine();
                         _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
                         _StdOut.advanceLine();
-                        _Scheduler.scheduleNextProcess();
+
+                        /// checks if there are any more processes to execute
+                        if(this.schedulerFlag = true)
+                        {
+                            _Kernel.initiateContextSwitch();
+                        }
                     }
+                        
 
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
@@ -133,8 +140,8 @@
                     this.savePCB();
                     TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
-                     // context switchest if we use runall command
-                    if(this.schedulerFlag)
+                     // increases the quantum counter
+                    if(this.schedulerFlag = true)
                     {
                         _Scheduler.manageQuantum();
                     }
@@ -305,6 +312,7 @@
                         else 
                         {
                             _StdOut.putText(`Unknown system call with Xreg: ${this.Xreg}`);
+                            this.pcb.state = "Terminated";
                         }
                         this.PC++;
                     break;
@@ -312,6 +320,7 @@
                     default:
                         _StdOut.advanceLine();
                         _StdOut.putText("error"); // deffinetly could put something better or debugging but it truly is an error
+                        this.pcb.state = "Terminated";
                         this.isExecuting = false;
                 }
             }

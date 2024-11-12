@@ -461,7 +461,33 @@ var TSOS;
                 _StdOut.putText("Usage: run <pid>");
             }
         }
+        // runs all programs within the resident list using round robin scheduling with a q of 6 or a user specified quantum
+        shellrunall() {
+            if (_MemoryManager.readyQueue.length > 0) {
+                _CPU.setScheduler(true);
+                _Kernel.initiateContextSwitch();
+            }
+            else {
+                _StdOut.putText("No programs loaded to run.");
+            }
+        }
+        // lets the user set the round robin quantum
+        shellquantum(args) {
+            if (args.length > 0) {
+                const quantum = parseInt(args[0]);
+                if (!isNaN(quantum) && quantum > 0) {
+                    _Scheduler.setQuantum(quantum);
+                    _StdOut.putText(`Quantum has been set to ${quantum} cycles.`);
+                }
+                else {
+                    _StdOut.putText("Quantum must be a positive integer.");
+                }
+            }
+        }
         // clears all memory
+        // Something weird i found is that after loading programs in and then clearing memory, if i were to load more
+        // in again, my pcb would update and i can still context switch, however it's delayed in the memory display.
+        // I havn't quit figured out what it is
         shellclearmem() {
             _MemoryManager.clearMemory(); // clears memory and PCBs
             TSOS.Control.updatePcbDisplay(); // updates PCB display
@@ -482,73 +508,14 @@ var TSOS;
                 _StdOut.advanceLine();
             }
         }
-        // kills a process
+        // kills a process using the kernel
         shellkill(args) {
-            // validates the command
-            if (args.length === 0 || isNaN(Number(args[0]))) {
-                _StdOut.putText("Usage: kill <pid> - Please provide a valid PID.");
-                return;
-            }
-            const pid = parseInt(args[0], 10); // converts the given pid to a number
-            const pcbToKill = _MemoryManager.getPCB(pid); // retrieves the PCB by PID
-            // checks if the PCB exists
-            if (!pcbToKill) {
-                _StdOut.putText(`Process with PID ${pid} not found.`);
-                return;
-            }
-            // marks the process as terminated 
-            pcbToKill.state = "Terminated";
-            _StdOut.putText(`Process ${pid} has been terminated.`);
-            // if the CPU is executing the process, stop the execution
-            if (_CPU.isExecuting && _CPU.getCurrentPCB() && _CPU.getCurrentPCB().PID === pid) {
-                // this ensures if there are multiple processes in the queue, continue their execution
-                _Scheduler.scheduleNextProcess();
-            }
-            // update the PCB display  to show it's termination
-            TSOS.Control.updatePcbDisplay();
+            const pid = parseInt(args[0], 10);
+            _Kernel.terminateProcess(pid);
         }
-        // runs all programs within the resident list using round robin scheduling with a q of 6 (soon to be "or a user defined quantum");
-        shellrunall() {
-            if (_MemoryManager.readyQueue.length > 0) {
-                // sets the scheduling flag to true within the cpu class to allow for scheduling 
-                _CPU.setScheduler(true);
-                _StdOut.putText("Running all loaded programs...");
-                // starts executing with the first process in the que
-                _Scheduler.scheduleNextProcess();
-                _CPU.isExecuting = true;
-            }
-            else {
-                _StdOut.putText("No programs loaded to run.");
-            }
-        }
-        // lets the user set the round robin quantum
-        shellquantum(args) {
-            if (args.length > 0) {
-                // sets the quantum to be the number input
-                const quantum = parseInt(args[0]);
-                // checking the input is a valid number
-                if (!isNaN(quantum) && quantum > 0) {
-                    _Scheduler.setQuantum(quantum); // sets the scheduler quantum
-                    _StdOut.putText(`Quantum has been set to ${quantum} cycles.`);
-                }
-            }
-            else {
-                _StdOut.putText("quantum must be a postive integer");
-            }
-        }
-        // lets the user set the round robin quantum
+        // kills all processes through the kernel
         shellkillall() {
-            // gets all pcbs 
-            const allPCBs = _MemoryManager.getAllPCBs();
-            // makrs each pcb as terminated 
-            for (let i = 0; i < allPCBs.length; i++) {
-                allPCBs[i].state = "Terminated";
-            }
-            // stops cpu execution
-            _CPU.isExecuting = false;
-            // updates the pcb display to show the pcb terminated state
-            TSOS.Control.updatePcbDisplay();
-            _StdOut.putText("All processes have been terminated.");
+            _Kernel.terminateAllProcesses();
         }
     }
     TSOS.Shell = Shell;

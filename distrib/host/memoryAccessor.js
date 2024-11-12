@@ -19,9 +19,11 @@ var TSOS;
             this.limit = limit;
         }
         // checks if the address is within the base and limit bounds
+        // this needs to change. I'm not sure if it's problems with this other than having to stop the process,
+        // but I think it has something to do with either the address being retrieved, or somthing to do with the pcb contents.
         checkMemoryBounds(address) {
             if (address < this.base || address >= this.base + this.limit) {
-                _Kernel.krnTrace(`Memory access violation at address ${address}`);
+                //_StdOut.putText(`Memory access violation at address ${address}`);
                 return null;
             }
         }
