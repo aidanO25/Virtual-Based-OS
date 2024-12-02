@@ -1,7 +1,9 @@
 A few things to note:
-1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong.With that said, I am still able to execute instructions such as a9 01 ff. I can see it loads into the accumulator and when it's done the process terminates.
+1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong. With that said, I am still able to execute instructions such as a9 01 ff. I can see it loads into the accumulator and when it's done the process terminates.
 2) Speaking of I am able to context switch using the kernel along with tracking process' and states.
 3) Lastly I was having trouble with enforcing memory bounds. I could do it with one process, but once there was more than once it always said there was an out-of-bounds at 236. There's more to this is my commit descriptions
+
+4) I didn't think to put this note in but I definitely should have. I have been using the "lots of loops" code/portions of it to test my scheduler and dispatcher. This was because some of the gladdos ones, especially the one with "A9 A9 A9". That throws my os for a loop. No pun intended. But that is how I was able to see if my implementation had worked.
 
 
 Please grade the iProject3 branch. I haven't merged it with main yet, but if I should for any reason let me know
