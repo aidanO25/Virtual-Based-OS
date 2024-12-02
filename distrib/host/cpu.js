@@ -119,7 +119,7 @@ var TSOS;
                 this.savePCB();
                 TSOS.Control.updatePcbDisplay(); // updates the PCB display
                 // increases the quantum counter
-                if (this.schedulerFlag = true) {
+                if (this.schedulerFlag === true) {
                     _Scheduler.manageQuantum();
                 }
                 // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
