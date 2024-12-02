@@ -13,15 +13,28 @@ var TSOS;
         Zflag; // zero Flag
         base; // base memory address
         limit; // end of memory address
-        constructor(pid, base, limit) {
+        state; // process state 
+        location; // process location
+        priority; // process priority 
+        // for tracking process turnaround time (thank you for offering +10)
+        arrivalTime; // the time a process is added to the ready que
+        startTime = null; // when the process first gets the CPU  
+        completionTime = null; // when the process completes
+        cpuBurstTime = 0; // time incremented each cycle
+        constructor(pid, base, limit, priority = 0) {
             this.PID = pid;
-            this.PC = 0; // Initialized to the start of the program
+            this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
             this.ACC = 0;
             this.Xreg = 0;
             this.Yreg = 0;
             this.Zflag = 0;
             this.base = base;
             this.limit = limit;
+            this.state = "Resident"; // default is resident (but can change to ready, running, or terminated)
+            this.location = "0"; // default location is 0, but can be 1 or 2
+            this.priority = priority; // Default priority is 0
+            // for turnaround and wait time caculation
+            this.arrivalTime = Date.now();
         }
     }
     TSOS.PCB = PCB;

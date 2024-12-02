@@ -70,7 +70,6 @@ module TSOS {
             // TODO in the future: Optionally update a log database or some streaming service.
         }
 
-
         //
         // Host Events
         //
@@ -94,9 +93,9 @@ module TSOS {
 
             // initializing memory
             Control.hostLog("Initializing memory");
-            _Memory = new TSOS.Memory(256);  // Initialize memory with 256 bytes
+            _Memory = new TSOS.Memory(768);  // increased memory size to allow for partitions
             Control.hostLog("Initializing memory accessor");
-            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory);  // Create MemoryAccessor to manage memory
+            _MemoryAccessor = new TSOS.MemoryAccessor(_Memory, _MemoryManager);  // Create MemoryAccessor to manage memory
             Control.hostLog("Memory set up");
 
             // .. and call the OS Kernel Bootstrap routine.
@@ -166,6 +165,38 @@ module TSOS {
             document.getElementById("cpuZ").innerText = _CPU.Zflag.toString();
         }
 
+        // this is the code to update the PCB display
+        // This most deffinetly will have to be updated once I get scheduliling going. I mean it has to be updated regardless
+        public static updatePcbDisplay(): void {
+            const pcbTable = document.getElementById("pcbTable").getElementsByTagName("tbody")[0];
+        
+            // clear all rows
+            pcbTable.innerHTML = ""; // clear all rows
+        
+            // gets all te PIDs from memoryManager
+            const pids = _MemoryManager.getAllPIDs();
+        
+            // iterates through PIDs and displays the corresponding PCBs
+            pids.forEach(pid => {
+                const pcb = _MemoryManager.getPCB(pid);
+        
+                if (pcb) {
+                    const row = pcbTable.insertRow();
+                    row.insertCell(0).innerText = pcb.PID.toString();
+                    row.insertCell(1).innerText = pcb.state;
+                    row.insertCell(2).innerText = pcb.location;
+                    row.insertCell(3).innerText = pcb.priority.toString();
+                    row.insertCell(4).innerText = pcb.PC.toString();
+                    row.insertCell(5).innerText = pcb.ACC.toString();
+                    row.insertCell(6).innerText = pcb.Xreg.toString();
+                    row.insertCell(7).innerText = pcb.Yreg.toString();
+                    row.insertCell(8).innerText = pcb.Zflag.toString();
+                    row.insertCell(9).innerText = pcb.base.toString();
+                    row.insertCell(10).innerText = pcb.limit.toString();
+                }
+            });
+        }
+
         // this displays the memory in the UI 
         /*
         (I had some AI help with this, specifically the for loops for populating/setting up the table or grid. 
@@ -190,7 +221,7 @@ module TSOS {
         
                 // inserts the address in the first cell
                 const cellAddress = row.insertCell(0);
-                cellAddress.innerHTML = address.toString(16).toUpperCase().padStart(3, '0'); // displays the address (in hex of course)
+                cellAddress.innerHTML = `0x${address.toString(16).toUpperCase().padStart(2, '0')}`; // ensuring it's displayed in base 16 per note on iproject2
         
                 // insert memory values (use 00 if prepopulating)
                 for (let i = 0; i < valuesPerRow; i++) 
@@ -223,6 +254,13 @@ module TSOS {
                     }
                 }
             }
+        }
+
+        // updates the PCB and memory display
+        public shellClearmem(args): void {
+            _MemoryManager.clearMemory(); // Clear all memory and PCBs
+            TSOS.Control.updatePcbDisplay(); // Refresh the PCB display
+            TSOS.Control.updateMemoryDisplay(); // refresh the memory display 
         }
     }
 }

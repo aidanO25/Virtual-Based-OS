@@ -66,8 +66,24 @@ var TSOS;
             // bsod
             sc = new TSOS.ShellCommand(this.shellbsod, "bsod", "Call at your own risk");
             this.commandList[this.commandList.length] = sc;
-            // ps  - list the running processes and their IDs
-            // kill <id> - kills the specified process id.
+            // clear's all memory
+            sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", "clears all memory segments");
+            this.commandList[this.commandList.length] = sc;
+            // displays the pid and state of all processes
+            sc = new TSOS.ShellCommand(this.shellps, "ps", "displays the PID and state of all processes");
+            this.commandList[this.commandList.length] = sc;
+            // kills a process
+            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> kills a process");
+            this.commandList[this.commandList.length] = sc;
+            // runs all processes within the ready queue
+            sc = new TSOS.ShellCommand(this.shellrunall, "runall", "runs all processes");
+            this.commandList[this.commandList.length] = sc;
+            // set's the quantum
+            sc = new TSOS.ShellCommand(this.shellquantum, "quantum", "<int> lets the user set the Round Robin quantum");
+            this.commandList[this.commandList.length] = sc;
+            // kills all processes
+            sc = new TSOS.ShellCommand(this.shellkillall, "killall", "kills all processes");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -260,6 +276,21 @@ var TSOS;
                     case "bsod":
                         _StdOut.putText("tests the screen of death");
                         break;
+                    case "clearmem":
+                        _StdOut.putText("clears all memory segments");
+                        break;
+                    case "ps":
+                        _StdOut.putText("displays the PID and state of all processes");
+                    case "kill":
+                        _StdOut.putText("kills one process");
+                        break;
+                    case "runall":
+                        _StdOut.putText("runs all processes");
+                    case "quantum":
+                        _StdOut.putText("sets the quantum for Round Robin scheduling");
+                    case "killall":
+                        _StdOut.putText("kills all processes");
+                        break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
                 }
@@ -383,10 +414,10 @@ var TSOS;
                     program.push(parseInt(hexByte, 16)); // converts the hex pair to a number and stores it in the program array
                 }
                 if (isValid) {
-                    TSOS.Control.updateMemoryDisplay(false);
-                    const pid = _MemoryManager.loadProgram(program); // loads a program into memory
+                    TSOS.Control.updateMemoryDisplay();
+                    _MemoryManager.loadProgram(program); // loads a program into memory
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
-                    _StdOut.putText(`Program loaded with PID: ${pid}`);
+                    //_StdOut.putText(`Program loaded with PID: ${pid}`);
                 }
                 else {
                     _StdOut.putText("Input is invalid. Only hex digits (0-9, A-F) and spaces are allowed.");
@@ -398,6 +429,7 @@ var TSOS;
         it is still fixed, however my previous commit put this back to what i originally had (bsod would not display)
         because I screwed this file up so bad that i had to go bck into github and copy and paste the last time it was working (classic)
         */
+        // BSOD command to test screen of death
         shellbsod() {
             const bsodImage = new Image(); // object for our bsod image
             bsodImage.src = "error.png"; // image path
@@ -409,14 +441,15 @@ var TSOS;
         }
         // This is the shell command to run a program from memory per its PID
         shellRun(args) {
+            _CPU.setScheduler(false);
             if (args.length > 0) {
                 const pid = parseInt(args[0]);
-                // Fetch the PCB using the MemoryManager
+                // Fetch the PCB using the MemoryManager based on the input pid
                 const pcb = _MemoryManager.getPCB(pid);
+                // if true
                 if (pcb) {
                     // Load the PCB into the CPU
                     _CPU.loadPCB(pcb);
-                    // Start executing the program
                     _CPU.isExecuting = true;
                     _StdOut.putText(`Program with PID: ${pid} is now running.`);
                 }
@@ -428,15 +461,61 @@ var TSOS;
                 _StdOut.putText("Usage: run <pid>");
             }
         }
-        // BSOD command to test screen of death
-        shellbsod(args) {
-            const bsodImage = new Image(); // object for our bsod image
-            bsodImage.src = "error.png"; // image path
-            // once the iage is loaded it's presented onto the canvas
-            bsodImage.onload = () => {
-                _DrawingContext.clearRect(0, 0, _Canvas.width, _Canvas.height);
-                _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
-            };
+        // runs all programs within the resident list using round robin scheduling with a q of 6 or a user specified quantum
+        shellrunall() {
+            if (_MemoryManager.readyQueue.length > 0) {
+                _CPU.setScheduler(true);
+                _Kernel.initiateContextSwitch();
+            }
+            else {
+                _StdOut.putText("No programs loaded to run.");
+            }
+        }
+        // lets the user set the round robin quantum
+        shellquantum(args) {
+            if (args.length > 0) {
+                const quantum = parseInt(args[0]);
+                if (!isNaN(quantum) && quantum > 0) {
+                    _Scheduler.setQuantum(quantum);
+                    _StdOut.putText(`Quantum has been set to ${quantum} cycles.`);
+                }
+                else {
+                    _StdOut.putText("Quantum must be a positive integer.");
+                }
+            }
+        }
+        // clears all memory
+        // Something weird i found is that after loading programs in and then clearing memory, if i were to load more
+        // in again, my pcb would update and i can still context switch, however it's delayed in the memory display.
+        // I havn't quit figured out what it is
+        shellclearmem() {
+            _MemoryManager.clearMemory(); // clears memory and PCBs
+            TSOS.Control.updatePcbDisplay(); // updates PCB display
+            TSOS.Control.updateMemoryDisplay(); // updates memory display
+            _StdOut.putText("Memory cleared.");
+        }
+        // displays the PID and state of all processes
+        shellps() {
+            const pcbs = _MemoryManager.getAllPCBs(); // gets all pcb's from memory manager
+            if (pcbs.length === 0) {
+                _StdOut.putText("No processes in memory.");
+                return;
+            }
+            // loops through each PCB and displays the PID and state
+            for (let i = 0; i < pcbs.length; i++) {
+                const pcb = pcbs[i];
+                _StdOut.putText("PID: " + pcb.PID + ", State: " + pcb.state);
+                _StdOut.advanceLine();
+            }
+        }
+        // kills a process using the kernel
+        shellkill(args) {
+            const pid = parseInt(args[0], 10);
+            _Kernel.terminateProcess(pid);
+        }
+        // kills all processes through the kernel
+        shellkillall() {
+            _Kernel.terminateAllProcesses();
         }
     }
     TSOS.Shell = Shell;

@@ -21,6 +21,8 @@ var TSOS;
         memoryAccessor;
         pcb;
         isExecuting;
+        // indicates whether or not we use the scheduler or not (only when we use runall)
+        schedulerFlag = false;
         constructor(PC = 0, Acc = 0, Xreg = 0, Yreg = 0, Zflag = 0, memoryAccessor = null, // reference to MemoryAccessor
         pcb = null, // reference to the CURRENT PCB 
         isExecuting = false) {
@@ -41,15 +43,29 @@ var TSOS;
             this.Zflag = 0;
             this.isExecuting = false;
         }
-        // starts executing a process
+        // loads the current pcb into the cpu
         loadPCB(pcb) {
-            // loading the pCB values into the CPU
             this.pcb = pcb;
+            // this makes sure the PC is within the process's memory bounds 
+            if (pcb.PC < pcb.base || pcb.PC >= pcb.limit) {
+                //_StdOut.putText(`Invalid PC value ${pcb.PC} for process ${pcb.PID}.`);
+                this.isExecuting = false;
+            }
+            // changing the state to running once it's been loaded into the the cpu
+            this.pcb.state = "Ready";
             this.PC = pcb.PC;
             this.Acc = pcb.ACC;
             this.Xreg = pcb.Xreg;
             this.Yreg = pcb.Yreg;
             this.Zflag = pcb.Zflag;
+            this.memoryAccessor.setBounds(pcb.base, pcb.limit);
+            // sets the start time as the first time the PCB is loaded
+            // Moved this to after the values are set because the process really wouldn't have been loaded yet
+            if (!pcb.startTime) {
+                pcb.startTime = Date.now();
+            }
+            // starts cycling 
+            //_StdOut.putText(`Loading PID ${pcb.PID}, setting PC to ${pcb.base}`);
             this.isExecuting = true;
         }
         // saves the current state of the CPU back into the PCB
@@ -62,29 +78,60 @@ var TSOS;
                 this.pcb.Zflag = this.Zflag;
             }
         }
+        getCurrentPCB() {
+            return this.pcb;
+        }
         // this allows the cpu to fetch, decond, and execute
         cycle() {
             _Kernel.krnTrace('CPU cycle');
             // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
             if (this.memoryAccessor && this.isExecuting) {
+                this.pcb.state = "Running";
                 // fetch
                 const instruction = this.memoryAccessor.read(this.PC);
+                //_StdOut.putText(`Executing PID ${this.pcb.PID}: Base - ${this.pcb.base}, Limit - ${this.pcb.limit}`); debug for out of bounds. I would uncomment this if you are looking to trouble shoot
+                //_StdOut.advanceLine();
                 // decode and execute
                 this.executeInstruction(instruction);
-                // debug, can get rid of this and should for final commit
-                //_StdOut.putText(`Executed: ${instruction.toString(16).toUpperCase()}`);
-                //_StdOut.putText(`| PC: ${this.PC} | Acc: ${this.Acc} | Xreg: ${this.Xreg.toString(16).toUpperCase()} | Y register: ${this.Yreg} | Zflag: ${this.Zflag.toString(16).toUpperCase()}`);
-                //_StdOut.advanceLine();
+                this.pcb.cpuBurstTime += 1; // for wait time calculation
+                // this terminates a program if there are no other instrucitons to execute along with displaying turnaround time and wait time
+                // It still stops on A9 regardless. comment this out to see it print inner1 (it can't go more than that because of instruction issues)
+                if (!instruction) {
+                    // changing the pcb state to terminated
+                    this.pcb.state = "Terminated";
+                    // sets the completion time to the current time
+                    this.pcb.completionTime = Date.now();
+                    // calculating turnaround and wait time
+                    const turnaroundTime = this.pcb.completionTime - this.pcb.arrivalTime;
+                    const waitTime = turnaroundTime - this.pcb.cpuBurstTime;
+                    // displays turnaround time
+                    _StdOut.advanceLine();
+                    _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
+                    _StdOut.advanceLine();
+                    /// checks if there are any more processes to execute
+                    if (this.schedulerFlag = true) {
+                        _Kernel.initiateContextSwitch();
+                    }
+                }
                 TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                 TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                 // saves the current state of the pcb
                 this.savePCB();
-                // checks if single step mode has been activated
+                TSOS.Control.updatePcbDisplay(); // updates the PCB display
+                // increases the quantum counter
+                if (this.schedulerFlag === true) {
+                    _Scheduler.manageQuantum();
+                }
+                // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                 if (TSOS.Control.singleStepMode) {
                     // if so, execute one instruction and then stop execution
                     this.isExecuting = false;
                 }
             }
+        }
+        // enable or disable the shceduler
+        setScheduler(value) {
+            this.schedulerFlag = value;
         }
         // these are the instructions from the 6502alan Machine language Instruction Set
         executeInstruction(instruction) {
@@ -154,8 +201,11 @@ var TSOS;
                     this.PC++; // just in incrementing the program counter
                     break;
                 case 0x00: // break (System call) I assume we just stop executing and increment the program counter
-                    this.isExecuting = false;
                     this.PC++;
+                    if (this.memoryAccessor.read(this.PC) === 0x00) {
+                        this.PC--;
+                        this.isExecuting = false;
+                    }
                     break;
                 case 0xEC: // compare a byte in memory to the X register
                     this.PC++; // increment the pc to get the low byte of the mem address
@@ -168,11 +218,13 @@ var TSOS;
                     this.PC++; // moves to the next operand
                     break;
                 case 0xD0: // branch if Z flag is equal to 0
-                    this.PC++; // increments the pc counter to get the branch offset 
+                    // increments the pc counter to get the branch offset 
+                    this.PC++;
                     if (this.Zflag === 0) {
                         // if the z flag is 0, add the branch offset to the pc
                         const branchValue = this.memoryAccessor.read(this.PC);
-                        this.PC += branchValue; // adds the branch offset to the pc
+                        this.PC = this.PC + branchValue;
+                        alert(branchValue);
                     }
                     else {
                         // otherwise just skip the branch operand
@@ -207,16 +259,20 @@ var TSOS;
                     }
                     else {
                         _StdOut.putText(`Unknown system call with Xreg: ${this.Xreg}`);
+                        this.pcb.state = "Terminated";
                     }
                     this.PC++;
                     break;
                 default:
                     _StdOut.advanceLine();
                     _StdOut.putText("error"); // deffinetly could put something better or debugging but it truly is an error
+                    this.pcb.state = "Terminated";
                     this.isExecuting = false;
             }
         }
     }
     TSOS.Cpu = Cpu;
 })(TSOS || (TSOS = {}));
+//branch forward:  d0 03 a9 05 ea a9 07 00
+// branch backward: a9 07 ea d0 fb ea 00
 //# sourceMappingURL=cpu.js.map

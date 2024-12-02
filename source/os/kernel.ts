@@ -12,6 +12,7 @@
 var _Memory: TSOS.Memory;
 var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager: TSOS.MemoryManager;
+var _Scheduler: TSOS.Scheduler;
 var _CPU: TSOS.Cpu;
 
 module TSOS {
@@ -33,7 +34,12 @@ module TSOS {
             _CPU = new TSOS.Cpu(0, 0, 0, 0, 0, _MemoryAccessor, null, false);
             this.krnTrace("CPU initialized.");
 
-
+            // adding the scheduler to the kernel
+            this.krnTrace("initializing scheduler");
+            _Scheduler = new TSOS.Scheduler(_MemoryManager);
+            this.krnTrace("scheduler initialized");
+            
+            
             // Initialize our global queues.
             _KernelInterruptQueue = new Queue();  // A (currently) non-priority queue for interrupt requests (IRQs).
             _KernelBuffers = new Array();         // Buffers... for the kernel.
@@ -105,6 +111,72 @@ module TSOS {
             } else {                       // If there are no interrupts and there is nothing being executed then just be idle.
                 this.krnTrace("Idle");
             }
+        }
+
+        // this allows us to switch the current process in execution with the next
+        public initiateContextSwitch(): void 
+        {
+            this.krnTrace("Context switch called");
+            // gets teh next process from the scheduler 
+            const nextPCB = _Scheduler.getNextProcess();
+            if (nextPCB) 
+            {
+                // envokes the disbatcher to dispatch the next process in line
+                this.dispatchProcess(nextPCB);
+            }
+        
+            else 
+            {
+                this.krnTrace("No runnable processes. Halting CPU.");
+                _CPU.isExecuting = false;
+            }
+        }
+
+        // dispatcher to dispatch the next process found by the context switch above
+        private dispatchProcess(pcb: PCB): void 
+        {
+            if (_CPU.pcb) 
+            {
+                _CPU.savePCB();
+                if (_CPU.pcb.state !== "Terminated") 
+                {
+                    _CPU.pcb.state = "Waiting";
+                }
+            }
+            _CPU.loadPCB(pcb);
+            pcb.state = "Ready";
+            _CPU.isExecuting = true;
+
+            TSOS.Control.updatePcbDisplay();
+            this.krnTrace(`Dispatching process PID ${pcb.PID}`);
+        }
+
+        // this allows us to terminate a desired process while still allowing the other's to finish their execution
+        public terminateProcess(pid: number): void 
+        {
+            const pcb = _MemoryManager.getPCB(pid);
+            if (pcb) 
+            {
+                pcb.state = "Terminated";
+                TSOS.Control.updatePcbDisplay();
+                this.initiateContextSwitch();
+                _StdOut.putText(`Process ${pid} has been terminated.`);
+            } 
+            else 
+            {
+                _StdOut.putText(`Process with PID ${pid} not found.`);
+            }
+        }
+
+        // this allows us to terminate all processes being executed
+        public terminateAllProcesses(): void 
+        {
+            const allPCBs = _MemoryManager.getAllPCBs();
+            allPCBs.forEach(pcb => pcb.state = "Terminated");
+            _CPU.isExecuting = false;
+            TSOS.Control.updatePcbDisplay();
+            _StdOut.putText("All processes have been terminated.");
+            _StdOut.advanceLine();
         }
 
 

@@ -6,7 +6,7 @@ module TSOS
         public memoryArray: number[]; // Array representing the memory space
         public size: number;
 
-        constructor(size: number = 256) 
+        constructor(size: number = 768) 
         {
             this.size = size; // duh
             this.memoryArray = new Array(this.size).fill(0); // im not sure what brain fart i was having, but this is not the initialization of memory
@@ -23,5 +23,6 @@ module TSOS
         {
             this.memoryArray[address] = value;
         }
+
     }
 }

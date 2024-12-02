@@ -1,3 +1,9 @@
+A few things to note:
+1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong.With that said, I am still able to execute instructions such as a9 01 ff. I can see it loads into the accumulator and when it's done the process terminates.
+2) Speaking of I am able to context switch using the kernel along with tracking process' and states.
+3) Lastly I was having trouble with enforcing memory bounds. I could do it with one process, but once there was more than once it always said there was an out-of-bounds at 236. There's more to this is my commit descriptions
+
+
 Please grade the iProject3 branch. I haven't merged it with main yet, but if I should for any reason let me know
 =================================================
 2024 Browser-based Operating System in TypeScript
