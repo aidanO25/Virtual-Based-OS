@@ -3,9 +3,9 @@ module TSOS {
 
     export class DiskSystemDriver extends DeviceDriver 
     {
-        private trackMax: number = 4; // 0 - 3
-        private sectorMax: number = 8; // 0-7
-        private blockMax: number = 8; // 0-7
+        private trackMax: number = 3; 
+        private sectorMax: number = 7;
+        private blockMax: number = 7;
 
         constructor() 
         {
@@ -31,6 +31,7 @@ module TSOS {
         
                 // Initialize the file system
                 this.initializeFileSystem();
+                this.updateDiskDisplay();
         
                 // Log success
                 _Kernel.krnTrace("Disk System Device Driver initialized successfully.");
@@ -58,8 +59,54 @@ module TSOS {
                     }
                 }
             }
-            _Kernel.krnTrace("File system initialized in sessionStorage.");
         }
+
+        // updates the disk display
+        public updateDiskDisplay(): void 
+        {
+            const tableBody = document.getElementById("diskTable").getElementsByTagName("tbody")[0];
+            tableBody.innerHTML = ""; // clears the table for updates (im sure there is a better maybe fasterw way to do this)
+        
+            // I had chat help in the logic behind these loops
+            for (let t = 0; t <= this.trackMax; t++) {
+                for (let s = 0; s <= this.sectorMax; s++) {
+                    for (let b = 0; b <= this.blockMax; b++) {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = sessionStorage.getItem(key);
+                        const row = tableBody.insertRow(); // Create a new row for every T:S:B
+        
+                        // checks that the specific block reference contains valid data 
+                        // really to prevent any errors if data is null or undefined in which it would just skip processing that block
+                        if (blockData) 
+                        {
+                            // parses the block data and displays the contents
+                            const parsedData = JSON.parse(blockData);
+                            row.insertCell(0).innerText = key; // T:S:B
+                            row.insertCell(1).innerText = parsedData.used ? "1" : "0"; // in use
+                            row.insertCell(2).innerText = parsedData.next; // reference
+                            row.insertCell(3).innerText = parsedData.data; // data
+                        } 
+                        else 
+                        {
+                            // display empty blocks
+                            row.insertCell(0).innerText = key; // T:S:B
+                            row.insertCell(1).innerText = "0"; // not in use
+                            row.insertCell(2).innerText = "0:0:0"; // default reference
+                            row.insertCell(3).innerText = "0".repeat(60); // filled with empty data (is 0 the best use?)
+                        }
+                    }
+                }
+            }
+        }
+
+        // formats the disk. I still have to add the shell command to do so. 
+        // currently it is formatted on load
+        public format() {
+            // initializes all tracks, sectors, and blocks
+            sessionStorage.clear();
+            console.log("Disk formatted.");
+        }
+
 
     }
 }

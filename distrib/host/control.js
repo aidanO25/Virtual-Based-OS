@@ -206,6 +206,9 @@ var TSOS;
             _MemoryManager.clearMemory(); // Clear all memory and PCBs
             TSOS.Control.updatePcbDisplay(); // Refresh the PCB display
             TSOS.Control.updateMemoryDisplay(); // refresh the memory display 
+            // should probably update the disk display too if we are clearing all memory
+            // that is unless this should only be clearing logical memory rather than physical. In
+            // that case I should do that here
         }
     }
     TSOS.Control = Control;
