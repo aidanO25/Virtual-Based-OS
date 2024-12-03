@@ -49,40 +49,43 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellDate, "date", "<string> - Displays the current date and time.");
             this.commandList[this.commandList.length] = sc;
             // location (assuming you don't actually want us to implement like an api to get a user's actual location)
-            sc = new TSOS.ShellCommand(this.shellLocation, "location", "Displays a user's current location (made up");
+            sc = new TSOS.ShellCommand(this.shellLocation, "location", " - Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
             // fun facts
-            sc = new TSOS.ShellCommand(this.shellFact, "fact", "Gives the user a fun fact");
+            sc = new TSOS.ShellCommand(this.shellFact, "fact", " - Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
             // status message
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Updates the current status");
             this.commandList[this.commandList.length] = sc;
             // load (check if user input is valid assembly)
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", "Validates the usercode in the HTML5 text area");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", " - Validates the usercode in the HTML5 text area");
             this.commandList[this.commandList.length] = sc;
             // runs a program in memory 
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - Runs the program with the given Process ID (PID).");
             this.commandList[this.commandList.length] = sc;
             // bsod
-            sc = new TSOS.ShellCommand(this.shellbsod, "bsod", "Call at your own risk");
+            sc = new TSOS.ShellCommand(this.shellbsod, "bsod", " - Call at your own risk");
             this.commandList[this.commandList.length] = sc;
             // clear's all memory
-            sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", "clears all memory segments");
+            sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", " - clears all memory segments");
             this.commandList[this.commandList.length] = sc;
             // displays the pid and state of all processes
-            sc = new TSOS.ShellCommand(this.shellps, "ps", "displays the PID and state of all processes");
+            sc = new TSOS.ShellCommand(this.shellps, "ps", " - displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
             // kills a process
-            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> kills a process");
+            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> -  kills a process");
             this.commandList[this.commandList.length] = sc;
             // runs all processes within the ready queue
-            sc = new TSOS.ShellCommand(this.shellrunall, "runall", "runs all processes");
+            sc = new TSOS.ShellCommand(this.shellrunall, "runall", " - runs all processes");
             this.commandList[this.commandList.length] = sc;
             // set's the quantum
-            sc = new TSOS.ShellCommand(this.shellquantum, "quantum", "<int> lets the user set the Round Robin quantum");
+            sc = new TSOS.ShellCommand(this.shellquantum, "quantum", " <int> - lets the user set the Round Robin quantum");
             this.commandList[this.commandList.length] = sc;
             // kills all processes
-            sc = new TSOS.ShellCommand(this.shellkillall, "killall", "kills all processes");
+            sc = new TSOS.ShellCommand(this.shellkillall, "killall", " - kills all processes");
+            this.commandList[this.commandList.length] = sc;
+            // kills all processes
+            sc = new TSOS.ShellCommand(this.shellformat, "format", " - formats the disk system");
             this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
@@ -290,6 +293,8 @@ var TSOS;
                         _StdOut.putText("sets the quantum for Round Robin scheduling");
                     case "killall":
                         _StdOut.putText("kills all processes");
+                    case "format":
+                        _StdOut.putText("formats the disk system");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -377,7 +382,6 @@ var TSOS;
                 _StdOut.putText("Usage: status <string> - Please supply a status message.");
             }
         }
-        // load method to load a program into memory
         // load method to load a program into memory
         shellLoad() {
             const userInput = document.getElementById("taProgramInput").value.trim();
@@ -516,6 +520,22 @@ var TSOS;
         // kills all processes through the kernel
         shellkillall() {
             _Kernel.terminateAllProcesses();
+        }
+        // formats the disk system
+        shellformat() {
+            try {
+                // calls the format method from the disk driver through the kernel
+                if (_krnDiskSystemDriver) {
+                    _krnDiskSystemDriver.format();
+                    _StdOut.putText("Disk formatted successfully.");
+                }
+                else {
+                    _StdOut.putText("Disk system is not initialized.");
+                }
+            }
+            catch (error) {
+                _StdOut.putText("An error occurred while formatting the disk: " + error.message);
+            }
         }
     }
     TSOS.Shell = Shell;

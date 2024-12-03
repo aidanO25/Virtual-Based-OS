@@ -20,11 +20,8 @@ var TSOS;
                     _Kernel.krnTrace("SessionStorage is not supported in this environment.");
                     throw new Error("SessionStorage unavailable");
                 }
-                // Initialize the file system
-                this.initializeFileSystem();
-                this.updateDiskDisplay();
                 // Log success
-                _Kernel.krnTrace("Disk System Device Driver initialized successfully.");
+                _Kernel.krnTrace("Disk System Device Driver loaded not formatted.");
             }
             catch (error) {
                 this.status = "failed";
@@ -83,9 +80,11 @@ var TSOS;
         // formats the disk. I still have to add the shell command to do so. 
         // currently it is formatted on load
         format() {
-            // initializes all tracks, sectors, and blocks
-            sessionStorage.clear();
+            sessionStorage.clear(); // clear all previous data
+            this.initializeFileSystem();
+            this.updateDiskDisplay(); // updates the display 
             console.log("Disk formatted.");
+            _Kernel.krnTrace("Disk formatted successfully.");
         }
     }
     TSOS.DiskSystemDriver = DiskSystemDriver;

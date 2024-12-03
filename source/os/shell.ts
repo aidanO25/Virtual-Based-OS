@@ -83,13 +83,13 @@ module TSOS {
             // location (assuming you don't actually want us to implement like an api to get a user's actual location)
             sc = new ShellCommand(this.shellLocation,
                                   "location",
-                                  "Displays a user's current location (made up");
+                                  " - Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
 
             // fun facts
             sc = new ShellCommand(this.shellFact,
                                   "fact",
-                                  "Gives the user a fun fact");
+                                  " - Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
 
             // status message
@@ -101,7 +101,7 @@ module TSOS {
             // load (check if user input is valid assembly)
             sc = new ShellCommand(this.shellLoad,
                                   "load",
-                                  "Validates the usercode in the HTML5 text area");
+                                  " - Validates the usercode in the HTML5 text area");
             this.commandList[this.commandList.length] = sc;
             
             // runs a program in memory 
@@ -113,43 +113,49 @@ module TSOS {
             // bsod
             sc = new ShellCommand(this.shellbsod, 
                                   "bsod", 
-                                  "Call at your own risk");
+                                  " - Call at your own risk");
             this.commandList[this.commandList.length] = sc;
 
             // clear's all memory
             sc = new ShellCommand(this.shellclearmem, 
                                     "clearmem", 
-                                    "clears all memory segments");
+                                    " - clears all memory segments");
             this.commandList[this.commandList.length] = sc;
 
             // displays the pid and state of all processes
             sc = new ShellCommand(this.shellps, 
                                     "ps", 
-                                    "displays the PID and state of all processes");
+                                    " - displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
 
              // kills a process
              sc = new ShellCommand(this.shellkill, 
                                     "kill", 
-                                    "<pid> kills a process");
+                                    "<pid> -  kills a process");
             this.commandList[this.commandList.length] = sc;
 
             // runs all processes within the ready queue
             sc = new ShellCommand(this.shellrunall, 
                 "runall", 
-                "runs all processes");
+                " - runs all processes");
             this.commandList[this.commandList.length] = sc;
 
             // set's the quantum
             sc = new ShellCommand(this.shellquantum, 
                 "quantum", 
-                "<int> lets the user set the Round Robin quantum");
+                " <int> - lets the user set the Round Robin quantum");
             this.commandList[this.commandList.length] = sc;
 
              // kills all processes
              sc = new ShellCommand(this.shellkillall, 
                 "killall", 
-                "kills all processes");
+                " - kills all processes");
+            this.commandList[this.commandList.length] = sc;
+
+            // kills all processes
+            sc = new ShellCommand(this.shellformat, 
+                "format", 
+                " - formats the disk system");
             this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
@@ -370,6 +376,8 @@ module TSOS {
                         _StdOut.putText("sets the quantum for Round Robin scheduling");
                     case "killall":
                         _StdOut.putText("kills all processes");
+                    case "format":
+                        _StdOut.putText("formats the disk system");
                         break;
 
 
@@ -465,7 +473,6 @@ module TSOS {
             }
         }
 
-        // load method to load a program into memory
         // load method to load a program into memory
         public shellLoad() {
             const userInput = (document.getElementById("taProgramInput") as HTMLTextAreaElement).value.trim();
@@ -643,6 +650,28 @@ module TSOS {
         // kills all processes through the kernel
         public shellkillall(): void {
             _Kernel.terminateAllProcesses();
+        }
+
+        // formats the disk system
+        public shellformat(): void 
+        {
+            try 
+            {
+                // calls the format method from the disk driver through the kernel
+                if (_krnDiskSystemDriver) 
+                {
+                    _krnDiskSystemDriver.format();
+                    _StdOut.putText("Disk formatted successfully.");
+                } 
+                else 
+                {
+                    _StdOut.putText("Disk system is not initialized.");
+                }
+            } 
+            catch (error) 
+            {
+                _StdOut.putText("An error occurred while formatting the disk: " + error.message);
+            }
         }
     }
 }
