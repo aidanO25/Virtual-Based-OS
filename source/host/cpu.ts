@@ -135,8 +135,6 @@
                         
                     }
                     
-                        
-
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     
@@ -151,7 +149,6 @@
                         _Scheduler.manageQuantum();
                     }
                     
-
                     // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                     if (TSOS.Control.singleStepMode) 
                     {

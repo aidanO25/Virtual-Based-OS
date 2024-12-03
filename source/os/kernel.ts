@@ -14,10 +14,9 @@ var _MemoryAccessor: TSOS.MemoryAccessor;
 var _MemoryManager: TSOS.MemoryManager;
 var _Scheduler: TSOS.Scheduler;
 var _CPU: TSOS.Cpu;
+var _krnDiskSystemDriver: TSOS.DiskSystemDriver;
 
 module TSOS {
-
-    
 
     export class Kernel {
         //
@@ -58,6 +57,13 @@ module TSOS {
             _krnKeyboardDriver = new DeviceDriverKeyboard();     // Construct it.
             _krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+
+            // Load the Disk System Device Driver
+            // loads the disk system device driver
+            this.krnTrace("Loading the disk system device driver.");
+            _krnDiskSystemDriver = new TSOS.DiskSystemDriver(); // Construct it.
+            _krnDiskSystemDriver.driverEntry();                // Call the driverEntry() initialization routine.
+            this.krnTrace(_krnDiskSystemDriver.status);    // logs the status
 
             //
             // ... more?
