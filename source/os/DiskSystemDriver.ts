@@ -6,6 +6,7 @@ module TSOS {
         private trackMax: number = 3; 
         private sectorMax: number = 7;
         private blockMax: number = 7;
+        public formatFlag: boolean = false;
 
         constructor() 
         {
@@ -101,10 +102,67 @@ module TSOS {
             sessionStorage.clear(); // clear all previous data
             this.initializeFileSystem();
             this.updateDiskDisplay(); // updates the display 
-            console.log("Disk formatted.");
+            this.formatFlag = true;
             _Kernel.krnTrace("Disk formatted successfully.");
         }
 
-
+        // creates a file with the name provided
+        public create(filename: string): boolean
+        {
+            // ensures we dont create a file without the disk being formatted
+            // in the shell command there is a message to format the disk 
+            if(this.formatFlag === false)
+            {
+                return false;
+            }
+            else
+            {
+                // converts the filename to hex
+                const hexFilename = filename
+                .split("")
+                .map(function (char) 
+                {
+                    return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0");
+                })
+                .join("");
+            
+                // checks if the filename is too long
+                if (hexFilename.length > 60)
+                {
+                    _Kernel.krnTrace(`Filename '${filename}' is too long.`);
+                    return false;
+                }
+            
+                // finds a free block in the directory
+                for (let s = 0; s <= this.sectorMax; s++)
+                {
+                    for (let b = 1; b <= this.blockMax; b++) // b is set to 1 so we dont use the first block 
+                    {
+                        const key = `0:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key)); // i had chap help with this part:
+                        // parese converts the retrieved string back into a JavaScript object or data structure. 
+                        // This is needed because the data was originally stored as a JSON object, 
+                        // but it is saved in sessionStorage as a string.
+            
+                        if (!blockData.used)
+                        {
+                            blockData.used = true; // marks the block as used
+                            blockData.next = key; // reference points to itself since there isn't any data in it yet
+                            blockData.data = hexFilename.padEnd(60, "0"); // pad the rest of the file with 0s
+            
+                            sessionStorage.setItem(key, JSON.stringify(blockData)); // i had chat help writing this part, specifically with using json.stringify:
+                            // Converts the blockData object back into a string format so it can be stored in sessionStorage.
+                            _Kernel.krnTrace(`File '${filename}' created successfully at ${key}.`);
+                            this.updateDiskDisplay(); // updates the display 
+                            return true;
+                        }
+                    }
+                }
+            
+                // in the case that there aren't any more available blocks:
+                _Kernel.krnTrace("No free directory block available to create the file.");
+                return false;
+            }
+        }
     }
 }

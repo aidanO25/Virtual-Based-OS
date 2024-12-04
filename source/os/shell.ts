@@ -152,10 +152,16 @@ module TSOS {
                 "- kills all processes");
             this.commandList[this.commandList.length] = sc;
 
-            // kills all processes
+            // formats the disk
             sc = new ShellCommand(this.shellformat, 
                 "format", 
                 "- formats the disk system");
+            this.commandList[this.commandList.length] = sc;
+
+            // creates a file with the name included
+            sc = new ShellCommand(this.shellCreate, 
+                "create", 
+                "<filename> - creates a file with the name included");
             this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
@@ -378,6 +384,8 @@ module TSOS {
                         _StdOut.putText("kills all processes");
                     case "format":
                         _StdOut.putText("formats the disk system");
+                    case "create":
+                        _StdOut.putText("creates a file with the name provided");
                         break;
 
 
@@ -671,6 +679,29 @@ module TSOS {
             catch (error) 
             {
                 _StdOut.putText("An error occurred while formatting the disk: " + error.message);
+            }
+        }
+
+        // used by the disk driver to create a file 
+        public shellCreate(args: string[]): void 
+        {
+            if (args.length < 1) 
+            {
+                _StdOut.putText("Usage: create <filename>");
+                return;
+            }
+        
+            const filename = args[0];
+            const result = _krnDiskSystemDriver.create(filename);
+        
+            if (result)
+            {
+                _StdOut.putText(`File '${filename}' created successfully.`);
+            } 
+            else
+            {
+                _StdOut.putText(`Failed to create file '${filename}'. `);
+                _StdOut.putText("Have you formatted the disk?"); // ensures you format the disk
             }
         }
     }
