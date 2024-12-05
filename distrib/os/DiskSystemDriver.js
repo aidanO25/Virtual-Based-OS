@@ -133,7 +133,7 @@ var TSOS;
                 return false;
             }
         }
-        // function to write data to a filename
+        // function to write data to a file name
         writeFile(filename, data) {
             // ensures we dont create a file without the disk being formatted
             // in the shell command there is a message to format the disk 
@@ -152,8 +152,23 @@ var TSOS;
                         const blockData = JSON.parse(sessionStorage.getItem(key));
                         // locates the block per filename and ensures it's used
                         if (blockData.used && blockData.data.startsWith(filenameHex)) {
-                            // finds the first free block to store data
-                            let currentReference = this.getNextFreeDataBlock();
+                            // clears any previously allocated blocks (I am aware that in reality the data isn't cleared, its just made available but I figured
+                            // that I'd keep it like this to minimize issues. I'd like to change it later, but now is not the time)
+                            let currentReference = blockData.next;
+                            blockData.next = "0:0:0";
+                            sessionStorage.setItem(key, JSON.stringify(blockData));
+                            while (currentReference !== "0:0:0") {
+                                const blockKey = currentReference;
+                                const block = JSON.parse(sessionStorage.getItem(blockKey));
+                                currentReference = block.next;
+                                // marks the block as unused and resets the data
+                                block.used = false;
+                                block.data = "0".repeat(60);
+                                block.next = "0:0:0";
+                                sessionStorage.setItem(blockKey, JSON.stringify(block));
+                            }
+                            // writes the new data to the file
+                            currentReference = this.getNextFreeDataBlock();
                             if (!currentReference) {
                                 _StdOut.putText("No free space available on disk.");
                                 return false;
@@ -161,8 +176,7 @@ var TSOS;
                             // updates the block with the first data block reference
                             blockData.next = currentReference;
                             sessionStorage.setItem(key, JSON.stringify(blockData));
-                            // initializes the remaining data to be written
-                            let remainingData = hexData;
+                            let remainingData = hexData; // initializes the remaining data to be written
                             // continues to write until all data has been stored
                             while (remainingData.length > 0) {
                                 const blockKey = currentReference;
@@ -171,9 +185,8 @@ var TSOS;
                                 block.used = true;
                                 block.data = remainingData.slice(0, 60).padEnd(60, "0");
                                 sessionStorage.setItem(blockKey, JSON.stringify(block));
-                                // removes the written portion of data from remainingData
-                                remainingData = remainingData.slice(60);
-                                // if there is still more data to write, // get the next free block to write to
+                                remainingData = remainingData.slice(60); // removes the written portion of data from remainingData
+                                // if there is still more data to write, get the next free block to write to
                                 if (remainingData.length > 0) {
                                     const nextBlock = this.getNextFreeDataBlock();
                                     if (!nextBlock) {
