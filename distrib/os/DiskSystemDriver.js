@@ -135,52 +135,59 @@ var TSOS;
         }
         // function to write data to a filename
         writeFile(filename, data) {
-            // locates the file's directory entry (no chat help this time, got the hang of it)
-            for (let t = 0; t <= this.trackMax; t++) {
-                for (let s = 0; s <= this.sectorMax; s++) {
-                    for (let b = 0; b <= this.blockMax; b++) {
-                        const key = `${t}:${s}:${b}`;
-                        const blockData = JSON.parse(sessionStorage.getItem(key));
-                        // checks if the block is in use and matches the filename
-                        if (blockData.used && blockData.data.startsWith(this.convertToHex(filename))) {
-                            // writes the data to the next available data block
-                            let currentReference = this.getNextFreeDataBlock();
-                            if (!currentReference) {
-                                _StdOut.putText("No free space available on disk.");
-                                return false;
-                            }
-                            // updates the directory entry to point to the first data block
-                            blockData.next = currentReference;
-                            sessionStorage.setItem(key, JSON.stringify(blockData));
-                            // breaks the data into 60 byte blocks to then write to the disk
-                            const hexData = this.convertToHex(data);
-                            let remainingData = hexData;
-                            let currentKey = currentReference;
-                            while (remainingData.length > 0) {
-                                const blockKey = currentKey;
-                                const block = JSON.parse(sessionStorage.getItem(blockKey));
-                                block.used = true;
-                                // only write up to 60 bytes
-                                block.data = remainingData.slice(0, 60).padEnd(60, "0");
-                                remainingData = remainingData.slice(60);
-                                // if needed get teh next block
-                                if (remainingData.length > 0) {
-                                    const nextBlock = this.getNextFreeDataBlock();
-                                    if (!nextBlock) {
-                                        _StdOut.putText("Not enough space to write the entire file.");
-                                        return false;
+            // ensures we dont create a file without the disk being formatted
+            // in the shell command there is a message to format the disk 
+            if (this.formatFlag === false) {
+                return false;
+            }
+            else {
+                // locates the file's directory entry (no chat help this time, got the hang of it)
+                for (let t = 0; t <= this.trackMax; t++) {
+                    for (let s = 0; s <= this.sectorMax; s++) {
+                        for (let b = 0; b <= this.blockMax; b++) {
+                            const key = `${t}:${s}:${b}`;
+                            const blockData = JSON.parse(sessionStorage.getItem(key));
+                            // checks if the block is in use and matches the filename
+                            if (blockData.used && blockData.data.startsWith(this.convertToHex(filename))) {
+                                // writes the data to the next available data block
+                                let currentReference = this.getNextFreeDataBlock();
+                                if (!currentReference) {
+                                    _StdOut.putText("No free space available on disk.");
+                                    return false;
+                                }
+                                // updates the directory entry to point to the first data block
+                                blockData.next = currentReference;
+                                sessionStorage.setItem(key, JSON.stringify(blockData));
+                                // breaks the data into 60 byte blocks to then write to the disk
+                                const hexData = this.convertToHex(data);
+                                let remainingData = hexData;
+                                let currentKey = currentReference;
+                                while (remainingData.length > 0) {
+                                    const blockKey = currentKey;
+                                    const block = JSON.parse(sessionStorage.getItem(blockKey));
+                                    block.used = true;
+                                    // only write up to 60 bytes
+                                    block.data = remainingData.slice(0, 60).padEnd(60, "0");
+                                    remainingData = remainingData.slice(60);
+                                    // if needed get teh next block
+                                    if (remainingData.length > 0) {
+                                        const nextBlock = this.getNextFreeDataBlock();
+                                        if (!nextBlock) {
+                                            _StdOut.putText("Not enough space to write the entire file.");
+                                            return false;
+                                        }
+                                        block.next = nextBlock;
+                                        currentKey = nextBlock;
                                     }
-                                    block.next = nextBlock;
-                                    currentKey = nextBlock;
+                                    else {
+                                        block.next = "0:0:0"; // end of the file
+                                    }
+                                    // save the block back to storage
+                                    sessionStorage.setItem(blockKey, JSON.stringify(block));
                                 }
-                                else {
-                                    block.next = "0:0:0"; // end of the file
-                                }
-                                // save the block back to storage
-                                sessionStorage.setItem(blockKey, JSON.stringify(block));
+                                this.updateDiskDisplay(); // updates the display
+                                return true; // shell outputs that it has been written
                             }
-                            this.updateDiskDisplay(); // updates the display
-                            return true; // shell outputs that it has been written
                         }
                     }
                 }

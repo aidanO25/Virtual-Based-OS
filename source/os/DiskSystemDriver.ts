@@ -172,6 +172,7 @@ module TSOS {
             for (let t = 0; t <= this.trackMax; t++)
             {
                 for (let s = 0; s <= this.sectorMax; s++)
+                // locates the file's directory entry (no chat help this time, got the hang of it)
                 {
                     for (let b = 0; b <= this.blockMax; b++)
                     {
