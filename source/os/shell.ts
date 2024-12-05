@@ -164,9 +164,16 @@ module TSOS {
                 "<filename> - creates a file with the name included");
             this.commandList[this.commandList.length] = sc;
 
+            // writes data to a file
             sc = new ShellCommand(this.shellWrite, 
                 "write", 
                 "<filename> <\"text\"> - writes the text to the filename");
+            this.commandList[this.commandList.length] = sc;
+
+            // reaads a file 
+            sc = new ShellCommand(this.shellRead, 
+                "read", 
+                "<filename> - reads the contents of the file");
             this.commandList[this.commandList.length] = sc;
 
             // Display the initial prompt.
@@ -393,6 +400,8 @@ module TSOS {
                         _StdOut.putText("creates a file with the name provided");
                     case "write":
                         _StdOut.putText("writes text data to the filename");
+                    case "read":
+                        _StdOut.putText("reads file data");
                         break;
 
 
@@ -741,6 +750,31 @@ module TSOS {
             else
             {
                 _StdOut.putText(`Failed to write data to file "${filename}".`);
+            }
+        }
+
+        // reads the contents of the provided file name
+        public shellRead(args: string[]): void
+        {
+            if(args.length < 1)
+            {
+                _StdOut.putText("Usage: read <filename>");
+                return null;
+            }
+            else
+            {
+                const filename = args[0];
+                const fileContents = _krnDiskSystemDriver.readFile(filename);
+
+                if(fileContents)
+                {
+                    _StdOut.putText(fileContents);
+                }
+                else
+                {
+                    _StdOut.putText("Unable to read file contents")
+                }
+
             }
         }
     }

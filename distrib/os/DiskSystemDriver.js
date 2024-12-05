@@ -188,6 +188,39 @@ var TSOS;
             _StdOut.putText(`File "${filename}" not found.`); // wrong filename or it just doesn't exist
             return false;
         }
+        // function to read data from the file name
+        readFile(filename) {
+            // ensures we dont create a file without the disk being formatted
+            // in the shell command there is a message to format the disk 
+            if (this.formatFlag === false) {
+                return null;
+            }
+            else {
+                // locates the file's directory entry 
+                for (let t = 0; t <= this.trackMax; t++) {
+                    for (let s = 0; s <= this.sectorMax; s++) {
+                        for (let b = 0; b <= this.blockMax; b++) {
+                            const key = `${t}:${s}:${b}`;
+                            const blockData = JSON.parse(sessionStorage.getItem(key));
+                            // checks if the block is in use and matches the filename
+                            if (blockData.used && blockData.data.startsWith(this.convertToHex(filename))) {
+                                // traverses the file's data blocks and "collects" the data
+                                let currentReference = blockData.next;
+                                let fileContents = "";
+                                while (currentReference !== "0:0:0") {
+                                    const dataBlock = JSON.parse(sessionStorage.getItem(currentReference));
+                                    fileContents += dataBlock.data.trim(); // this appends the data and trims the padded 0s
+                                    currentReference = dataBlock.next; // moves to the next block
+                                }
+                                return this.convertHexToString(fileContents);
+                            }
+                        }
+                    }
+                }
+                _StdOut.putText(`File "${filename}" not found. `);
+                return null;
+            }
+        }
         // helps to find the next free data blcok
         getNextFreeDataBlock() {
             for (let t = 1; t <= this.trackMax; t++) {
@@ -211,6 +244,15 @@ var TSOS;
                 return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0");
             })
                 .join("");
+        }
+        // another helper to convert hex to a string 
+        convertHexToString(hex) {
+            let str = "";
+            for (let i = 0; i < hex.length; i += 2) {
+                const charCode = parseInt(hex.slice(i, i + 2), 16);
+                str += String.fromCharCode(charCode);
+            }
+            return str;
         }
     }
     TSOS.DiskSystemDriver = DiskSystemDriver;
