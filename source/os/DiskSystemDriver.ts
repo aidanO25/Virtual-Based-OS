@@ -164,5 +164,112 @@ module TSOS {
                 return false;
             }
         }
+
+        // function to write data to a filename
+        public writeFile(filename: string, data: string): boolean
+        {
+            // locates the file's directory entry (no chat help this time, got the hang of it)
+            for (let t = 0; t <= this.trackMax; t++)
+            {
+                for (let s = 0; s <= this.sectorMax; s++)
+                {
+                    for (let b = 0; b <= this.blockMax; b++)
+                    {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+                        
+                        // checks if the block is in use and matches the filename
+                        if (blockData.used && blockData.data.startsWith(this.convertToHex(filename))) 
+                        {
+
+                            // writes the data to the next available data block
+                            let currentReference = this.getNextFreeDataBlock();
+                            if (!currentReference)
+                            {
+                                _StdOut.putText("No free space available on disk.");
+                                return false;
+                            }
+        
+                            // updates the directory entry to point to the first data block
+                            blockData.next = currentReference;
+                            sessionStorage.setItem(key, JSON.stringify(blockData));
+        
+                            // breaks the data into 60 byte blocks to then write to the disk
+                            const hexData = this.convertToHex(data);
+                            let remainingData = hexData;
+                            let currentKey = currentReference;
+        
+                            while (remainingData.length > 0)
+                            {
+                                const blockKey = currentKey;
+                                const block = JSON.parse(sessionStorage.getItem(blockKey));
+                                block.used = true;
+        
+                                // only write up to 60 bytes
+                                block.data = remainingData.slice(0, 60).padEnd(60, "0");
+                                remainingData = remainingData.slice(60);
+        
+                                // if needed get teh next block
+                                if (remainingData.length > 0)
+                                {
+                                    const nextBlock = this.getNextFreeDataBlock();
+                                    if (!nextBlock) {
+                                        _StdOut.putText("Not enough space to write the entire file.");
+                                        return false;
+                                    }
+                                    block.next = nextBlock;
+                                    currentKey = nextBlock;
+                                } 
+                                else
+                                {
+                                    block.next = "0:0:0"; // end of the file
+                                }
+
+                                // save the block back to storage
+                                sessionStorage.setItem(blockKey, JSON.stringify(block));
+                            }
+                            this.updateDiskDisplay(); // updates the display
+                            return true; // shell outputs that it has been written
+                        }
+                    }
+                }
+            }
+            _StdOut.putText(`File "${filename}" not found.`); // wrong filename or it just doesn't exist
+            return false;
+        }
+        
+
+        // helps to find the next free data blcok
+        private getNextFreeDataBlock(): string | null
+        {
+            for (let t = 1; t <= this.trackMax; t++)
+            {
+                for (let s = 0; s <= this.sectorMax; s++)
+                {
+                    for (let b = 0; b <= this.blockMax; b++)
+                    {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+                        if (!blockData.used)
+                        {
+                            return key;
+                        }
+                    }
+                }
+            }
+            return null; // no free block found. can't imagine there would ever be a case where there was no block
+        }
+        
+        // function to convert a sting to hex to make things easier
+        private convertToHex(input: string): string 
+        {
+            return input
+                .split("")
+                .map(function (char) 
+                {
+                    return char.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0");
+                })
+                .join("");
+        }
     }
 }

@@ -164,6 +164,11 @@ module TSOS {
                 "<filename> - creates a file with the name included");
             this.commandList[this.commandList.length] = sc;
 
+            sc = new ShellCommand(this.shellWrite, 
+                "write", 
+                "<filename> <\"text\"> - writes the text to the filename");
+            this.commandList[this.commandList.length] = sc;
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -386,6 +391,8 @@ module TSOS {
                         _StdOut.putText("formats the disk system");
                     case "create":
                         _StdOut.putText("creates a file with the name provided");
+                    case "write":
+                        _StdOut.putText("writes text data to the filename");
                         break;
 
 
@@ -701,7 +708,39 @@ module TSOS {
             else
             {
                 _StdOut.putText(`Failed to create file '${filename}'. `);
-                _StdOut.putText("Have you formatted the disk?"); // ensures you format the disk
+                _StdOut.putText("Have you formatted the disk?d"); // ensures you format the disk
+            }
+        }
+
+        // allows us to write text data to the disk
+        public shellWrite(args: string[]): void
+        {
+            if (args.length < 2)
+            {
+                _StdOut.putText("Usage: write <filename> \"data\"");
+                return;
+            }
+        
+            const filename = args[0];
+            const dataMatch = args.join(" ").match(/"(.+)"/);
+            if (!dataMatch || !dataMatch[1])
+            {
+                _StdOut.putText("Please include the data to write in quotes.");
+                return;
+            }
+        
+            const data = dataMatch[1]; // Extract data between quotes
+        
+            const success = _krnDiskSystemDriver.writeFile(filename, data);
+
+            if (success)
+            {
+                _StdOut.putText(`Data written to file "${filename}".`);
+                _krnDiskSystemDriver.updateDiskDisplay(); // Update the display
+            } 
+            else
+            {
+                _StdOut.putText(`Failed to write data to file "${filename}".`);
             }
         }
     }
