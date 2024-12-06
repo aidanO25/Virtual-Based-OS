@@ -413,6 +413,37 @@ module TSOS {
             return false;
         }
 
+        public listFiles(): string[]
+        {
+            // ensures the disk is formatted
+            if (!this.formatFlag)
+            {
+                _StdOut.putText("Disk is not formatted.");
+                return [];
+            }
+        
+            const fileList: string[] = [];
+        
+            // iterate through track 0 to locate file names
+            for (let s = 0; s <= this.sectorMax; s++)
+            {
+                for (let b = 1; b <= this.blockMax; b++)
+                {
+                    const key = `0:${s}:${b}`;
+                    const blockData = JSON.parse(sessionStorage.getItem(key));
+        
+                    if (blockData.used)
+                    {
+                        // gets the file name from the blocks data
+                        const hexFilename = blockData.data.trim();
+                        const filename = this.convertHexToString(hexFilename);
+                        fileList.push(filename);
+                    }
+                }
+            }
+            return fileList;
+        }
+        
         // helps to find the next free data blcok
         private getNextFreeDataBlock(): string | null
         {

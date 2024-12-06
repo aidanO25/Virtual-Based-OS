@@ -188,6 +188,12 @@ module TSOS {
                 "<filename> - renames the file name provided");
             this.commandList[this.commandList.length] = sc;
 
+            // lists all files on the disk
+            sc = new ShellCommand(this.shellLs, 
+                "ls", 
+                "- lists al the files on the disk");
+            this.commandList[this.commandList.length] = sc;
+
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -419,6 +425,9 @@ module TSOS {
                         break;
                     case "rename":
                         _StdOut.putText("renames a file");
+                        break;
+                    case "ls":
+                        _StdOut.putText("lists all files on disk");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -821,6 +830,29 @@ module TSOS {
                 const filename = args[0];
                 const newName = args[1];
                 _krnDiskSystemDriver.renameFile(filename, newName);
+            }
+        }
+
+        // lists all the files on the disk
+        public shellLs(): void
+        {
+            const fileList = _krnDiskSystemDriver.listFiles();
+
+            if (fileList.length === 0)
+            {
+                _StdOut.putText("No files found");
+                _StdOut.advanceLine();
+            }
+            else
+            {
+                _StdOut.putText("Files on disk:");
+                _StdOut.advanceLine();
+
+                for (let i = 0; i < fileList.length; i++)
+                {
+                    _StdOut.putText(fileList[i]);
+                    _StdOut.advanceLine();
+                }
             }
         }
     }

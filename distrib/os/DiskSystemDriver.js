@@ -316,6 +316,28 @@ var TSOS;
             _StdOut.putText("Unable to rename file");
             return false;
         }
+        listFiles() {
+            // ensures the disk is formatted
+            if (!this.formatFlag) {
+                _StdOut.putText("Disk is not formatted.");
+                return [];
+            }
+            const fileList = [];
+            // iterate through track 0 to locate file names
+            for (let s = 0; s <= this.sectorMax; s++) {
+                for (let b = 1; b <= this.blockMax; b++) {
+                    const key = `0:${s}:${b}`;
+                    const blockData = JSON.parse(sessionStorage.getItem(key));
+                    if (blockData.used) {
+                        // gets the file name from the blocks data
+                        const hexFilename = blockData.data.trim();
+                        const filename = this.convertHexToString(hexFilename);
+                        fileList.push(filename);
+                    }
+                }
+            }
+            return fileList;
+        }
         // helps to find the next free data blcok
         getNextFreeDataBlock() {
             for (let t = 1; t <= this.trackMax; t++) {
