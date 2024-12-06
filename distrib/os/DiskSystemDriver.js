@@ -338,6 +338,96 @@ var TSOS;
             }
             return fileList;
         }
+        // lets a file be copied to a new file
+        copyFile(fileName, secondFilename) {
+            if (!this.formatFlag) {
+                _StdOut.putText("Disk not formatted");
+                return false;
+            }
+            const filenameHex = this.convertToHex(fileName);
+            const secondFilenameHex = this.convertToHex(secondFilename);
+            // confirms that the original file does exist and the new filename is unique
+            let filenameKey = null;
+            // looping through disk to find included filename
+            for (let t = 0; t <= this.trackMax; t++) {
+                for (let s = 0; s <= this.sectorMax; s++) {
+                    for (let b = 0; b <= this.blockMax; b++) {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+                        // locates the original file
+                        if (blockData.used && blockData.data.startsWith(filenameHex)) {
+                            filenameKey = key;
+                        }
+                        // checks if a file with the new name alread exists
+                        // I think it would be good in the fucture to allow a file that alread exists to be overwritten with the data to be copied
+                        if (blockData.used && blockData.data.startsWith(secondFilenameHex)) {
+                            _StdOut.putText(`A file with the name "${secondFilename}" already exists.`);
+                            return false;
+                        }
+                    }
+                }
+            }
+            if (!filenameKey) {
+                _StdOut.putText(`File "${fileName}" not found.`);
+                return false;
+            }
+            // creates a new file in the directory
+            const newFileKey = this.getNextFreeDirectoryBlock();
+            if (!newFileKey) {
+                _StdOut.putText("No free space available in the directory."); // cant see this happening but again best preactice
+                return false;
+            }
+            const newFileBlock = JSON.parse(sessionStorage.getItem(newFileKey));
+            newFileBlock.used = true;
+            newFileBlock.data = secondFilenameHex.padEnd(60, "0");
+            sessionStorage.setItem(newFileKey, JSON.stringify(newFileBlock));
+            // copies the contents of the original file
+            const originalBlock = JSON.parse(sessionStorage.getItem(filenameKey));
+            let currentOriginalReference = originalBlock.next;
+            let currentNewReference = null;
+            while (currentOriginalReference !== "0:0:0") {
+                const originalDataBlock = JSON.parse(sessionStorage.getItem(currentOriginalReference));
+                const newDataBlockKey = this.getNextFreeDataBlock();
+                if (!newDataBlockKey) {
+                    _StdOut.putText("Not enough space to copy the file.");
+                    return false;
+                }
+                const newDataBlock = JSON.parse(sessionStorage.getItem(newDataBlockKey));
+                newDataBlock.used = true;
+                newDataBlock.data = originalDataBlock.data;
+                sessionStorage.setItem(newDataBlockKey, JSON.stringify(newDataBlock));
+                // Link the new file's blocks
+                if (!currentNewReference) {
+                    newFileBlock.next = newDataBlockKey;
+                    sessionStorage.setItem(newFileKey, JSON.stringify(newFileBlock));
+                }
+                else {
+                    const previousNewDataBlock = JSON.parse(sessionStorage.getItem(currentNewReference));
+                    previousNewDataBlock.next = newDataBlockKey;
+                    sessionStorage.setItem(currentNewReference, JSON.stringify(previousNewDataBlock));
+                }
+                currentNewReference = newDataBlockKey;
+                currentOriginalReference = originalDataBlock.next;
+            }
+            // Update the disk display
+            this.updateDiskDisplay();
+            _StdOut.putText(`File "${fileName}" successfully copied to "${secondFilename}".`);
+            return true;
+        }
+        // used only once for now to get the next free directory block
+        getNextFreeDirectoryBlock() {
+            for (let s = 0; s <= this.sectorMax; s++) {
+                for (let b = 1; b <= this.blockMax; b++) {
+                    // starts from block 1 to avoid "master boot record" which isn't there but just for best practice 
+                    const key = `0:${s}:${b}`;
+                    const blockData = JSON.parse(sessionStorage.getItem(key));
+                    if (!blockData.used) {
+                        return key;
+                    }
+                }
+            }
+            return null;
+        }
         // helps to find the next free data blcok
         getNextFreeDataBlock() {
             for (let t = 1; t <= this.trackMax; t++) {

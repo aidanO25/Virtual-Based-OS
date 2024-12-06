@@ -105,6 +105,9 @@ var TSOS;
             // lists all files on the disk
             sc = new TSOS.ShellCommand(this.shellLs, "ls", "- lists al the files on the disk");
             this.commandList[this.commandList.length] = sc;
+            // copies a file to a new filename
+            sc = new TSOS.ShellCommand(this.shellCopy, "copy", "<file to be coppied> <a new file name> - copies a file to another");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -327,6 +330,9 @@ var TSOS;
                         break;
                     case "ls":
                         _StdOut.putText("lists all files on disk");
+                        break;
+                    case "copy":
+                        _StdOut.putText("copies a file to a new filename");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -661,6 +667,22 @@ var TSOS;
                     _StdOut.putText(fileList[i]);
                     _StdOut.advanceLine();
                 }
+            }
+        }
+        // copys a file to a new file
+        shellCopy(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usge: copy <file to be coppied> <a new file name>");
+                return;
+            }
+            const originalFilename = args[0];
+            const newFilename = args[1];
+            const success = _krnDiskSystemDriver.copyFile(originalFilename, newFilename);
+            if (success) {
+                _StdOut.putText(`File "${originalFilename}" copied to "${newFilename}".`);
+            }
+            else {
+                _StdOut.putText(`Failed to copy file "${originalFilename}".`);
             }
         }
     }
