@@ -287,6 +287,35 @@ var TSOS;
             _StdOut.putText(`File "${filename}" not found. `);
             return false;
         }
+        // lets you rename a file
+        renameFile(filename, renamedName) {
+            // ensures the disk has been formatted
+            if (!this.formatFlag) {
+                _StdOut.putText("File must be formatted");
+                return false;
+            }
+            // loop through the disk to find the filename provided
+            for (let t = 0; t <= this.trackMax; t++) {
+                for (let s = 0; s <= this.sectorMax; s++) {
+                    for (let b = 0; b <= this.blockMax; b++) {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+                        const originalName = this.convertToHex(filename);
+                        const newName = this.convertToHex(renamedName);
+                        if (blockData.used && blockData.data.startsWith(originalName)) {
+                            // updating the directory with new name
+                            blockData.data = newName.padEnd(60, "0");
+                            sessionStorage.setItem(key, JSON.stringify(blockData)); //saves the update
+                            _StdOut.putText(`File "${filename}" changed to "${renamedName}" . `);
+                            this.updateDiskDisplay();
+                            return true;
+                        }
+                    }
+                }
+            }
+            _StdOut.putText("Unable to rename file");
+            return false;
+        }
         // helps to find the next free data blcok
         getNextFreeDataBlock() {
             for (let t = 1; t <= this.trackMax; t++) {

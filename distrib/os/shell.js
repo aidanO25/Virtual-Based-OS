@@ -99,6 +99,9 @@ var TSOS;
             // deletes a file 
             sc = new TSOS.ShellCommand(this.shellDelete, "delete", "<filename> - deletes the named file");
             this.commandList[this.commandList.length] = sc;
+            // renames a file 
+            sc = new TSOS.ShellCommand(this.shellRename, "rename", "<filename> - renames the file name provided");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -315,6 +318,9 @@ var TSOS;
                         _StdOut.putText("reads file data");
                     case "delete":
                         _StdOut.putText("deletes the named file");
+                        break;
+                    case "rename":
+                        _StdOut.putText("renames a file");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -621,6 +627,18 @@ var TSOS;
             else {
                 const filename = args[0];
                 _krnDiskSystemDriver.deleteFile(filename);
+            }
+        }
+        // lets a user rename a file
+        shellRename(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: rename <filename>");
+                return null;
+            }
+            else {
+                const filename = args[0];
+                const newName = args[1];
+                _krnDiskSystemDriver.renameFile(filename, newName);
             }
         }
     }
