@@ -133,6 +133,8 @@ var TSOS;
                 return false;
             }
         }
+        // putting this here so i can push commit to the shell write issue made. 
+        // I put the update i made to the write file to issue #44 without also adding it to the shell issue
         // function to write data to a file name
         writeFile(filename, data) {
             // ensures we dont create a file without the disk being formatted
