@@ -133,8 +133,6 @@ var TSOS;
                 return false;
             }
         }
-        // putting this here so i can push commit to the shell write issue made. 
-        // I put the update i made to the write file to issue #44 without also adding it to the shell issue
         // function to write data to a file name
         writeFile(filename, data) {
             // ensures we dont create a file without the disk being formatted
@@ -245,6 +243,49 @@ var TSOS;
                 _StdOut.putText(`File "${filename}" not found. `);
                 return null;
             }
+        }
+        // allows a file to be deleted
+        deleteFile(filename) {
+            // check if the disk has been formatted
+            if (!this.formatFlag) {
+                _StdOut.putText("Unable to delete file.");
+                return false;
+            }
+            const filenameHex = this.convertToHex(filename);
+            // loopoing through the disk to find the filename
+            for (let t = 0; t <= this.trackMax; t++) {
+                for (let s = 0; s <= this.sectorMax; s++) {
+                    for (let b = 0; b <= this.blockMax; b++) {
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+                        if (blockData.used && blockData.data.startsWith(filenameHex)) {
+                            // clears the directory entry
+                            blockData.used = false;
+                            blockData.data = "0".repeat(60);
+                            const firstReference = blockData.next;
+                            blockData.next = "0:0:0";
+                            sessionStorage.setItem(key, JSON.stringify(blockData));
+                            // clears all data blocks associated with the filename
+                            let currentReference = firstReference;
+                            while (currentReference !== "0:0:0") {
+                                const blockKey = currentReference;
+                                const block = JSON.parse(sessionStorage.getItem(blockKey));
+                                currentReference = block.next;
+                                // "resets" the used blocks to unused
+                                block.used = false;
+                                block.data = "0".repeat(60);
+                                block.next = "0:0:0";
+                                sessionStorage.setItem(blockKey, JSON.stringify(block));
+                            }
+                            this.updateDiskDisplay();
+                            _StdOut.putText(`File "${filename}" deleted successfully.`);
+                            return true;
+                        }
+                    }
+                }
+            }
+            _StdOut.putText(`File "${filename}" not found. `);
+            return false;
         }
         // helps to find the next free data blcok
         getNextFreeDataBlock() {

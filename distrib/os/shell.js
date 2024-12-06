@@ -96,6 +96,9 @@ var TSOS;
             // reaads a file 
             sc = new TSOS.ShellCommand(this.shellRead, "read", "<filename> - reads the contents of the file");
             this.commandList[this.commandList.length] = sc;
+            // deletes a file 
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "<filename> - deletes the named file");
+            this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
         }
@@ -310,6 +313,8 @@ var TSOS;
                         _StdOut.putText("writes text data to the filename");
                     case "read":
                         _StdOut.putText("reads file data");
+                    case "delete":
+                        _StdOut.putText("deletes the named file");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -605,6 +610,17 @@ var TSOS;
                 else {
                     _StdOut.putText("Unable to read file contents");
                 }
+            }
+        }
+        // deletes the contents of the provided file name
+        shellDelete(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: delete <filename>");
+                return null;
+            }
+            else {
+                const filename = args[0];
+                _krnDiskSystemDriver.deleteFile(filename);
             }
         }
     }
