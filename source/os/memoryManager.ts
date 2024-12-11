@@ -41,6 +41,9 @@ module TSOS {
             }
             _StdOut.putText("No available partitions.");
         }
+        private convertProgramToHexString(program: number[]): string {
+            return program.map(byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+        }
         
         public loadProgram(program: number[]): number 
         {
@@ -52,7 +55,21 @@ module TSOS {
             if (this.processResidentList.length >= 3) 
             {
                 _StdOut.putText("Maximum process limit reached");
-                return null;
+                const hexProgram = this.convertProgramToHexString(program);
+                const pid = this.processResidentList.length;
+                const filename = `process_${pid}`;
+                const result = _krnDiskSystemDriver.create(filename);
+                if(!result)
+                {
+                    _StdOut.putText("Error creating process on disk");
+                    return null;
+                }
+
+                _krnDiskSystemDriver.writeFile(filename, hexProgram);
+                const pcb = new PCB(pid, 0, 0); // no memory partition because well its on the disk
+                pcb.memOrDisk = "disk";
+                this.processResidentList.push(pcb);
+                return pid;
             }
             // checks if the program length exceeds the partition size and if so it says so 
             else if (program.length > 256) 
@@ -75,6 +92,7 @@ module TSOS {
             pcb.state = "New";
 
             this.availablePartitions[partition] = false; // marks the partition as taken
+            pcb.memOrDisk = "memory";
         
             // Debugging output
             _StdOut.putText(`Program loaded into memory with PID ${pcb.PID}`);

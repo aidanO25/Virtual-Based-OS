@@ -643,17 +643,44 @@ module TSOS {
             let memoryData = "";
             for(let address = base; address <= limit; address++)
             {
-                memoryData += this.memoryAccessor.read(address);
+                const byte = this.memoryAccessor.read(address);
+                memoryData += byte.toString(16).padStart(2, "00");
             }
             return memoryData;
         }
 
-        // helper for the above to clear memory partition
+        // helper to clear memory partition
         private clearMemoryPartition(base: number, limit: number): void
         {
             for(let address = base; address <= limit; address++)
             {
                 this.memoryAccessor.write(address, 0);
+            }
+        }
+
+        // rolls in a process
+        public rollInProces(pcb: PCB): boolean
+        {
+            const filename = `process_${pcb.PID}`;
+            const memoryData = _krnDiskSystemDriver.readFile(filename);
+            if(memoryData)
+            {
+                this.loadProcessToMemory(pcb, memoryData);
+                pcb.location = "memory";
+                _krnDiskSystemDriver.deleteFile(filename);
+                return true;
+            }
+            return false;
+        }
+
+        // helps to load process to memory
+        private loadProcessToMemory(pcb: PCB, data: string): void
+        {
+            let memoryIndex = pcb.base;
+            for(let i = 0; i < data.length; i += 2)
+            {
+                const byte = parseInt(data.substring(i, i + 2), 16); // converts hex string back to number
+                this.memoryAccessor.write(memoryIndex++, byte); // writes as number
             }
         }
     }

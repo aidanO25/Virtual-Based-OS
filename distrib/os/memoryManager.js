@@ -36,6 +36,9 @@ var TSOS;
             }
             _StdOut.putText("No available partitions.");
         }
+        convertProgramToHexString(program) {
+            return program.map(byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
+        }
         loadProgram(program) {
             const partition = this.findAvailablePartition(); // to find a partition
             const baseAddress = this.getBaseAddress(partition); // gets the base address to know where to start loading the program in
@@ -43,7 +46,19 @@ var TSOS;
             // ensures only three processes can be loaded 
             if (this.processResidentList.length >= 3) {
                 _StdOut.putText("Maximum process limit reached");
-                return null;
+                const hexProgram = this.convertProgramToHexString(program);
+                const pid = this.processResidentList.length;
+                const filename = `process_${pid}`;
+                const result = _krnDiskSystemDriver.create(filename);
+                if (!result) {
+                    _StdOut.putText("Error creating process on disk");
+                    return null;
+                }
+                _krnDiskSystemDriver.writeFile(filename, hexProgram);
+                const pcb = new TSOS.PCB(pid, 0, 0); // no memory partition because well its on the disk
+                pcb.memOrDisk = "disk";
+                this.processResidentList.push(pcb);
+                return pid;
             }
             // checks if the program length exceeds the partition size and if so it says so 
             else if (program.length > 256) {
@@ -60,6 +75,7 @@ var TSOS;
             this.readyQueue.push(pcb); // adds it to the ready queue if it's in the ready state
             pcb.state = "New";
             this.availablePartitions[partition] = false; // marks the partition as taken
+            pcb.memOrDisk = "memory";
             // Debugging output
             _StdOut.putText(`Program loaded into memory with PID ${pcb.PID}`);
             /*

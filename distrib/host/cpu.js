@@ -108,7 +108,7 @@ var TSOS;
                     _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
                     _StdOut.advanceLine();
                     /// checks if there are any more processes to execute
-                    if (this.schedulerFlag === true) // YOU ACTUALLY HAVE TO BE KIDDING ME
+                    if (this.schedulerFlag === true) // YOU ACTUALLY HAVE TO BE KIDDING ME!!! i love that i have to use === instead of =. I should know this by now
                      {
                         _Kernel.initiateContextSwitch();
                     }
