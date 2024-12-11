@@ -21,7 +21,9 @@ var TSOS;
         startTime = null; // when the process first gets the CPU  
         completionTime = null; // when the process completes
         cpuBurstTime = 0; // time incremented each cycle
-        constructor(pid, base, limit, priority = 0) {
+        // the following is to keep track of whether a process is in memory or swapped out
+        memOrDisk;
+        constructor(pid, base, limit, priority = 0, location = "memory") {
             this.PID = pid;
             this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
             this.ACC = 0;
@@ -35,6 +37,8 @@ var TSOS;
             this.priority = priority; // Default priority is 0
             // for turnaround and wait time caculation
             this.arrivalTime = Date.now();
+            // keeping track where the process resides
+            this.memOrDisk = null;
         }
     }
     TSOS.PCB = PCB;

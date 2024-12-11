@@ -3,12 +3,15 @@ module TSOS {
 
     export class DiskSystemDriver extends DeviceDriver 
     {
+        private memoryAccessor: MemoryAccessor;
+        private pcb: PCB;
+        
         private trackMax: number = 3; 
         private sectorMax: number = 7;
         private blockMax: number = 7;
         public formatFlag: boolean = false;
 
-        constructor() 
+        constructor()
         {
             super();
             this.driverEntry = this.krnDiskDriverEntry;
@@ -53,7 +56,7 @@ module TSOS {
                         });
                         sessionStorage.setItem(key, value);
                     }
-                }
+                } 
             }
         }
 
@@ -613,6 +616,45 @@ module TSOS {
                 str += String.fromCharCode(charCode);
             }
             return str;
+        }
+
+        // ---------------------------------------------------------------------------------
+        // the following functions deal with swapping memory to and from the disk
+
+        // roll out process
+        public rollOutProcess(pcb: PCB): boolean 
+        {
+            const memoryData = this.extractProcessMemory(pcb.base, pcb.limit);
+
+            // use the disk system to write process to disk
+            const filename = `process_${pcb.PID}`;
+            if(_krnDiskSystemDriver.writeFile(filename, memoryData))
+            {
+                pcb.memOrDisk = "disk"; // marks it as swapped out
+                this.clearMemoryPartition(pcb.base, pcb.limit) // clears memory
+                return true;
+            }
+            return false;
+        }
+
+        // helps to extract process memory
+        private extractProcessMemory(base: number, limit: number): string
+        {
+            let memoryData = "";
+            for(let address = base; address <= limit; address++)
+            {
+                memoryData += this.memoryAccessor.read(address);
+            }
+            return memoryData;
+        }
+
+        // helper for the above to clear memory partition
+        private clearMemoryPartition(base: number, limit: number): void
+        {
+            for(let address = base; address <= limit; address++)
+            {
+                this.memoryAccessor.write(address, 0);
+            }
         }
     }
 }
