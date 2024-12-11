@@ -34,7 +34,7 @@ var TSOS;
                     return i;
                 }
             }
-            _StdOut.putText("No available partitions.");
+            _StdOut.advanceLine();
         }
         convertProgramToHexString(program) {
             return program.map(byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
@@ -45,7 +45,8 @@ var TSOS;
             const limitAddress = baseAddress + 256; // Each partition is 256 bytes
             // ensures only three processes can be loaded 
             if (this.processResidentList.length >= 3) {
-                _StdOut.putText("Maximum process limit reached");
+                _StdOut.putText("Maximum process limit reached. Saving data on disk");
+                _StdOut.advanceLine();
                 const hexProgram = this.convertProgramToHexString(program);
                 const pid = this.processResidentList.length;
                 const filename = `process_${pid}`;
@@ -58,6 +59,8 @@ var TSOS;
                 const pcb = new TSOS.PCB(pid, 0, 0); // no memory partition because well its on the disk
                 pcb.memOrDisk = "disk";
                 this.processResidentList.push(pcb);
+                _StdOut.putText(`Program with pid: ${pid} loaded into memory with filename process_${pid}`);
+                _StdOut.advanceLine();
                 return pid;
             }
             // checks if the program length exceeds the partition size and if so it says so 
