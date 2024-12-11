@@ -639,8 +639,14 @@ module TSOS {
          {
             if (_MemoryManager.readyQueue.length > 0) 
             {
-                _CPU.setScheduler(true);
-                _Kernel.initiateContextSwitch();
+                const pcb = _MemoryManager.getPCB(0);
+                if(pcb)
+                {
+                    _CPU.loadPCB(pcb);
+                    _CPU.isExecuting = true;
+                    _CPU.setScheduler(true);
+                    _StdOut.putText("running all programs");
+                }
             } 
             else 
             {

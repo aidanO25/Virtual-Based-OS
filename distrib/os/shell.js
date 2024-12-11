@@ -506,8 +506,13 @@ var TSOS;
         // runs all programs within the resident list using round robin scheduling with a q of 6 or a user specified quantum
         shellrunall() {
             if (_MemoryManager.readyQueue.length > 0) {
-                _CPU.setScheduler(true);
-                _Kernel.initiateContextSwitch();
+                const pcb = _MemoryManager.getPCB(0);
+                if (pcb) {
+                    _CPU.loadPCB(pcb);
+                    _CPU.isExecuting = true;
+                    _CPU.setScheduler(true);
+                    _StdOut.putText("running all programs");
+                }
             }
             else {
                 _StdOut.putText("No programs loaded to run.");

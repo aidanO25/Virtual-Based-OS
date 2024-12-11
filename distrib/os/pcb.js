@@ -14,7 +14,9 @@ var TSOS;
         base; // base memory address
         limit; // end of memory address
         state; // process state 
-        location; // process location
+        // Process location (to be clear this is whether it is the
+        // first, second, or third process in the ready que). Not its location (memory or disk)
+        location;
         priority; // process priority 
         // for tracking process turnaround time (thank you for offering +10)
         arrivalTime; // the time a process is added to the ready que
