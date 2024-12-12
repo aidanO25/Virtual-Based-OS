@@ -232,6 +232,7 @@ module TSOS {
         
                             // updates the block with the first data block reference
                             blockData.next = currentReference;
+                            blockData.isHex = isHex; // metadata flag for reading a user program
                             sessionStorage.setItem(key, JSON.stringify(blockData));
         
                             let remainingData = hexData; // initializes the remaining data to be written
@@ -288,45 +289,40 @@ module TSOS {
             {
                 return null;
             }
-            if(filename.includes("process"))
+
+            const filenameHex = this.convertToHex(filename);
+
+            // locates the file's directory entry 
+            for (let t = 0; t <= this.trackMax; t++)
             {
-                _StdOut.putText("You are unable to read a processes contents. See pointer to confirm contents");
-                _StdOut.advanceLine();
-                return null;
-            }
-            else
-            {
-                // locates the file's directory entry 
-                for (let t = 0; t <= this.trackMax; t++)
+                for (let s = 0; s <= this.sectorMax; s++)
                 {
-                    for (let s = 0; s <= this.sectorMax; s++)
+                    for (let b = 0; b <= this.blockMax; b++)
                     {
-                        for (let b = 0; b <= this.blockMax; b++)
+                        const key = `${t}:${s}:${b}`;
+                        const blockData = JSON.parse(sessionStorage.getItem(key));
+
+                        // checks if the block is in use and matches the filename
+                        if (blockData.used && blockData.data.startsWith(filenameHex))
                         {
-                            const key = `${t}:${s}:${b}`;
-                            const blockData = JSON.parse(sessionStorage.getItem(key));
+                            const isHex = blockData.isHex; // retriieve the file type metadata
+                            // traverses the file's data blocks and "collects" the data
+                            let currentReference = blockData.next;
+                            let fileContents = "";
 
-                            // checks if the block is in use and matches the filename
-                            if (blockData.used && blockData.data.startsWith(this.convertToHex(filename)))
+                            while(currentReference !== "0:0:0")
                             {
-                                // traverses the file's data blocks and "collects" the data
-                                let currentReference = blockData.next;
-                                let fileContents = "";
-
-                                while(currentReference !== "0:0:0")
-                                {
-                                    const dataBlock = JSON.parse(sessionStorage.getItem(currentReference));
-                                    fileContents += dataBlock.data.trim(); // this appends the data and trims the padded 0s
-                                    currentReference = dataBlock.next; // moves to the next block
-                                }
-                                return this.convertHexToString(fileContents);
+                                const dataBlock = JSON.parse(sessionStorage.getItem(currentReference));
+                                fileContents += dataBlock.data.trim(); // this appends the data and trims the padded 0s
+                                currentReference = dataBlock.next; // moves to the next block
                             }
+                            return isHex ? fileContents : this.convertHexToString(fileContents);
                         }
                     }
                 }
-                _StdOut.putText(`File "${filename}" not found. `);
-                return null;
             }
+            _StdOut.putText(`File "${filename}" not found. `);
+            return null;
         }
 
         // allows a file to be deleted
