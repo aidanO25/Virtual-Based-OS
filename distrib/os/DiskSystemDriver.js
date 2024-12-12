@@ -283,13 +283,8 @@ var TSOS;
                                 block.next = "0:0:0";
                                 sessionStorage.setItem(blockKey, JSON.stringify(block));
                             }
-                            // Check if this is a process file and remove it from queues
-                            if (filename.startsWith("process_")) {
-                                const pid = parseInt(filename.replace("process_", ""), 10);
-                                this.removeProcessFromQueues(pid);
-                            }
                             this.updateDiskDisplay();
-                            TSOS.Control.updatePcbDisplay();
+                            //TSOS.Control.updatePcbDisplay();
                             _StdOut.putText(`File "${filename}" deleted successfully.`);
                             return true;
                         }

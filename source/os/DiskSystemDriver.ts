@@ -369,16 +369,8 @@ module TSOS {
                                 block.next = "0:0:0";
                                 sessionStorage.setItem(blockKey, JSON.stringify(block));
                             }
-
-                             // Check if this is a process file and remove it from queues
-                            if (filename.startsWith("process_")) 
-                            {
-                                const pid = parseInt(filename.replace("process_", ""), 10);
-                                this.removeProcessFromQueues(pid);
-                            }
         
                             this.updateDiskDisplay();
-                            TSOS.Control.updatePcbDisplay();
                             _StdOut.putText(`File "${filename}" deleted successfully.`);
                             return true;
                         }
@@ -387,25 +379,6 @@ module TSOS {
             }
             _StdOut.putText(`File "${filename}" not found. `);
             return false;
-        }
-
-        // I had some chat help with this specifically with finding th eindex and splicing. I wasn't sure how to go about this and 
-        // with a bit of a time crunch I figured I'd go that route
-        private removeProcessFromQueues(pid: number): void
-        {
-            // removes the pcb from the process resident list
-            const residentIndex = _MemoryManager.processResidentList.findIndex(pcb => pcb.PID === pid);
-            if (residentIndex !== -1)
-            {
-                _MemoryManager.processResidentList.splice(residentIndex, 1);
-            }
-        
-            // also removes the pcb from the ready queue
-            const readyIndex = _MemoryManager.readyQueue.findIndex(pcb => pcb.PID === pid);
-            if (readyIndex !== -1)
-            {
-                _MemoryManager.readyQueue.splice(readyIndex, 1);
-            }
         }
 
         // lets you rename a file
