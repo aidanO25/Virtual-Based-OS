@@ -208,7 +208,6 @@ var TSOS;
                                 }
                             }
                             this.updateDiskDisplay();
-                            _StdOut.putText("updating display");
                             TSOS.Control.updatePcbDisplay();
                             return true;
                         }
@@ -487,6 +486,12 @@ var TSOS;
                 str += String.fromCharCode(charCode);
             }
             return str;
+        }
+        checkFormat() {
+            if (this.formatFlag) {
+                return true;
+            }
+            return false;
         }
     }
     TSOS.DiskSystemDriver = DiskSystemDriver;

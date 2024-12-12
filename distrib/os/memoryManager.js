@@ -45,7 +45,12 @@ var TSOS;
             const baseAddress = this.getBaseAddress(partition); // gets the base address to know where to start loading the program in
             const limitAddress = baseAddress + 256; // Each partition is 256 bytes
             // ensures only three processes can be loaded 
-            if (this.processResidentList.length >= 3) {
+            if (this.processResidentList.filter(pcb => pcb.location === "memory").length >= 3) {
+                if (!_krnDiskSystemDriver.formatFlag) {
+                    _StdOut.putText("Error: Disk is not formatted. Unable to save process to disk.");
+                    _StdOut.advanceLine();
+                    return null;
+                }
                 _StdOut.putText("Maximum process limit reached. Saving data on disk");
                 _StdOut.advanceLine();
                 const hexProgram = this.convertProgramToHexString(program);

@@ -268,7 +268,6 @@ module TSOS {
                                 }
                             }
                             this.updateDiskDisplay();
-                            _StdOut.putText("updating display");
                             TSOS.Control.updatePcbDisplay();
                             return true;
                         }
@@ -650,6 +649,15 @@ module TSOS {
                 str += String.fromCharCode(charCode);
             }
             return str;
+        }
+
+        public checkFormat(): boolean
+        {
+            if(this.formatFlag)
+            {
+                return true;
+            }
+            return false;
         }
 
     }
