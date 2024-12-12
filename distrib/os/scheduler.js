@@ -6,6 +6,7 @@ var TSOS;
         quantum = 6;
         quantumCounter = 0;
         currentProcessIndex = 0;
+        cpu;
         constructor(memoryManager) {
             this.memoryManager = memoryManager;
         }
@@ -28,6 +29,12 @@ var TSOS;
             // ensures that there must be processes in the ready queue
             while (this.memoryManager.readyQueue.length > 0) {
                 const nextPCB = this.memoryManager.readyQueue[this.currentProcessIndex]; // gets the next process from the queue
+                // if the next process is on the disk, swap it out
+                if (nextPCB.location === "disk") {
+                    _StdOut.putText("shit is on disk");
+                    this.memoryManager.swapProcess(nextPCB);
+                    _StdOut.putText("swapped");
+                }
                 if (nextPCB.state !== "Terminated") {
                     this.currentProcessIndex = (this.currentProcessIndex + 1) % this.memoryManager.readyQueue.length; // I had chat help comming up with the logic for this
                     return nextPCB;

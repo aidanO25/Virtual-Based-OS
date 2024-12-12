@@ -28,13 +28,23 @@ var TSOS;
             }
         }
         // finds the next available partition
-        findAvailablePartition() {
+        /*
+        private findAvailablePartition(): number {
             for (let i = 0; i < this.partitions; i++) {
                 if (this.availablePartitions[i]) {
                     return i;
                 }
             }
             _StdOut.advanceLine();
+        }
+            */
+        findAvailablePartition() {
+            for (let i = 0; i < this.partitions; i++) {
+                if (this.availablePartitions[i]) {
+                    return i;
+                }
+            }
+            return undefined; // No free partition available
         }
         // oh i forgot to mention that i had chat help with this function
         convertProgramToHexString(program) {
@@ -127,6 +137,7 @@ var TSOS;
                 _StdOut.putText("Failed to roll in process from disk.");
                 return false;
             }
+            TSOS.Control.updatePcbDisplay();
             return true;
         }
         rollInProcess(pcb) {

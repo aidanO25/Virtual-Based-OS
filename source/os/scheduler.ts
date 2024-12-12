@@ -7,6 +7,7 @@ module TSOS
         private quantum: number = 6;
         private quantumCounter: number = 0;
         private currentProcessIndex: number = 0;
+        private cpu: Cpu;
 
         constructor(private memoryManager: MemoryManager) { }
 
@@ -28,6 +29,7 @@ module TSOS
         }
 
         // gets the next process in the queue
+        
         public getNextProcess(): PCB | null 
         {
             if (this.memoryManager.readyQueue.length === 0) return null;
@@ -36,6 +38,16 @@ module TSOS
             while (this.memoryManager.readyQueue.length > 0) 
             {
                 const nextPCB = this.memoryManager.readyQueue[this.currentProcessIndex]; // gets the next process from the queue
+
+                // if the next process is on the disk, swap it out
+                if(nextPCB.location === "disk")
+                {
+                    _StdOut.putText("shit is on disk");
+                    this.memoryManager.swapProcess(nextPCB);
+                    _StdOut.putText("swapped");
+
+                }
+
                 if (nextPCB.state !== "Terminated") {
                     this.currentProcessIndex = (this.currentProcessIndex + 1) % this.memoryManager.readyQueue.length; // I had chat help comming up with the logic for this
                     return nextPCB;
@@ -50,5 +62,6 @@ module TSOS
             }
             return null;
         }
+
     }
 }

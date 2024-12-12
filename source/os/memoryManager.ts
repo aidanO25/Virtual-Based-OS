@@ -32,14 +32,16 @@ module TSOS {
             }
         }
 
-        // finds the next available partition
-        private findAvailablePartition(): number {
-            for (let i = 0; i < this.partitions; i++) {
-                if (this.availablePartitions[i]) {
+        private findAvailablePartition(): number | undefined 
+        {
+            for (let i = 0; i < this.partitions; i++)
+            {
+                if (this.availablePartitions[i])
+                {
                     return i;
                 }
             }
-            _StdOut.advanceLine();
+            return undefined; // no free partition available
         }
 
         // oh i forgot to mention that i had chat help with this function
@@ -167,7 +169,7 @@ module TSOS {
                 _StdOut.putText("Failed to roll in process from disk.");
                 return false;
             }
-        
+            TSOS.Control.updatePcbDisplay();
             return true;
         }
 
