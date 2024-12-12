@@ -2,8 +2,6 @@
 var TSOS;
 (function (TSOS) {
     class DiskSystemDriver extends TSOS.DeviceDriver {
-        memoryAccessor;
-        pcb;
         trackMax = 3;
         sectorMax = 7;
         blockMax = 7;
@@ -210,6 +208,7 @@ var TSOS;
                                 }
                             }
                             this.updateDiskDisplay();
+                            TSOS.Control.updatePcbDisplay();
                             return true;
                         }
                     }

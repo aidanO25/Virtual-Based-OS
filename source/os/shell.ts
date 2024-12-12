@@ -606,6 +606,7 @@ module TSOS {
             };
         }
 
+        /*
         // This is the shell command to run a program from memory per its PID
         public shellRun(args: string[])
         {
@@ -629,6 +630,47 @@ module TSOS {
                 }
             } 
             else 
+            {
+                _StdOut.putText("Usage: run <pid>");
+            }
+        }
+            */
+        public shellRun(args: string[])
+        {
+            _CPU.setScheduler(false);
+
+            if (args.length > 0)
+            {
+                const pid = parseInt(args[0]);
+                // Fetch the PCB using the MemoryManager based on the input pid
+                const pcb = _MemoryManager.getPCB(pid);
+        
+                if (!pcb)
+                {
+                    _StdOut.putText(`No process found with PID: ${pid}`);
+                    return;
+                }
+        
+                if (pcb.location === "disk")
+                {
+                    // process is on the disk so it has to be swapped
+                    _StdOut.putText(`Swapping in process with PID ${pid} from disk.`);
+                    const swapSuccess = _MemoryManager.swapProcess(pcb);
+                    if (!swapSuccess)
+                    {
+                        _StdOut.putText("Failed to swap process into memory.");
+                        return;
+                    }
+                }
+        
+                // process is now in memory so we can execute it
+                pcb.state = "running";
+                TSOS.Control.updatePcbDisplay();
+                _CPU.loadPCB(pcb);
+                _CPU.isExecuting = true;
+                _StdOut.putText(`Program with PID ${pid} is now running.`);
+            } 
+            else
             {
                 _StdOut.putText("Usage: run <pid>");
             }

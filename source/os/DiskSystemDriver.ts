@@ -3,9 +3,6 @@ module TSOS {
 
     export class DiskSystemDriver extends DeviceDriver 
     {
-        private memoryAccessor: MemoryAccessor;
-        private pcb: PCB;
-        
         private trackMax: number = 3; 
         private sectorMax: number = 7;
         private blockMax: number = 7;
@@ -271,6 +268,7 @@ module TSOS {
                                 }
                             }
                             this.updateDiskDisplay();
+                            TSOS.Control.updatePcbDisplay();
                             return true;
                         }
                     }

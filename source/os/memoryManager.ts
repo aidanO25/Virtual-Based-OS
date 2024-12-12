@@ -59,7 +59,7 @@ module TSOS {
                 _StdOut.putText("Maximum process limit reached. Saving data on disk");
                 _StdOut.advanceLine();
                 const hexProgram = this.convertProgramToHexString(program);
-                const pid = this.processResidentList.length;
+                const pid = this.nextPID++; // uses next pid for to assign a unique pid in the case we delete one
                 const filename = `process_${pid}`;
                 const result = _krnDiskSystemDriver.create(filename);
                 if(!result)
@@ -144,6 +144,67 @@ module TSOS {
 
         //-----------------------------------------------------------------------
         // the code below specifically deals with the disk
+        public swapProcess(diskProcess: PCB): boolean
+        {
+            // Find a process in memory to roll out
+            const memoryProcess = this.processResidentList.find(pcb => pcb.location === "memory");
+            if (!memoryProcess || !this.rollOutProcess(memoryProcess))
+            {
+                _StdOut.putText("Failed to roll out process from memory.");
+                return false;
+            }
+        
+            // Roll in the disk-based process
+            if (!this.rollInProcess(diskProcess))
+            {
+                _StdOut.putText("Failed to roll in process from disk.");
+                return false;
+            }
+        
+            return true;
+        }
+
+        public rollInProcess(pcb: PCB): boolean
+        {
+            const filename = `process_${pcb.PID}`;
+            const programData = _krnDiskSystemDriver.readFile(filename);
+            if (!programData)
+            {
+                return false;
+            }
+        
+            const partition = this.findAvailablePartition();
+            const baseAddress = this.getBaseAddress(partition);
+            this.loadProcessToMemory(pcb, baseAddress, programData);
+        
+            pcb.location = "memory";
+            pcb.base = baseAddress;
+            pcb.limit = baseAddress + 256;
+            this.availablePartitions[partition] = false;
+        
+            // removes the process from the disk
+            _krnDiskSystemDriver.deleteFile(filename);
+            return true;
+        }
+
+        public rollOutProcess(pcb: PCB): boolean
+        {
+            const memoryData = this.extractProcessMemory(pcb.base, pcb.limit);
+            const filename = `process_${pcb.PID}`;
+            if (!_krnDiskSystemDriver.create(filename) || 
+                !_krnDiskSystemDriver.writeFile(filename, memoryData)){
+                return false;
+            }
+        
+            // updates PCB and memory state
+            pcb.location = "disk";
+            pcb.base = 0;
+            pcb.limit = 0;
+            this.availablePartitions[this.getPartitionIndex(pcb.base)] = true;
+            return true;
+        }
+
+
         private extractProcessMemory(base: number, limit: number): string 
         {
             let memoryData = "";
