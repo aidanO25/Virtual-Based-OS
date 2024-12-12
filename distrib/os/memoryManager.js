@@ -58,8 +58,11 @@ var TSOS;
                 }
                 _krnDiskSystemDriver.writeFile(filename, hexProgram);
                 const pcb = new TSOS.PCB(pid, 0, 0); // no memory partition because well its on the disk
-                pcb.memOrDisk = "disk";
+                pcb.location = "disk";
                 this.processResidentList.push(pcb);
+                this.readyQueue.push(pcb);
+                pcb.state = "ready";
+                TSOS.Control.updatePcbDisplay();
                 _StdOut.putText(`Program with pid: ${pid} loaded into memory with filename process_${pid}`);
                 _StdOut.advanceLine();
                 return pid;
@@ -77,9 +80,9 @@ var TSOS;
             const pcb = new TSOS.PCB(this.nextPID++, baseAddress, limitAddress);
             this.processResidentList.push(pcb); // adds the pcb to the proces resident list
             this.readyQueue.push(pcb); // adds it to the ready queue if it's in the ready state
-            pcb.state = "New";
+            pcb.state = "resident";
             this.availablePartitions[partition] = false; // marks the partition as taken
-            pcb.memOrDisk = "memory";
+            pcb.location = "memory";
             // Debugging output
             _StdOut.putText(`Program loaded into memory with PID ${pcb.PID}`);
             /*

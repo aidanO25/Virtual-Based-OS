@@ -288,6 +288,12 @@ module TSOS {
             {
                 return null;
             }
+            if(filename.includes("process"))
+            {
+                _StdOut.putText("You are unable to read a processes contents. See pointer to confirm contents");
+                _StdOut.advanceLine();
+                return null;
+            }
             else
             {
                 // locates the file's directory entry 
@@ -299,7 +305,7 @@ module TSOS {
                         {
                             const key = `${t}:${s}:${b}`;
                             const blockData = JSON.parse(sessionStorage.getItem(key));
-                                
+
                             // checks if the block is in use and matches the filename
                             if (blockData.used && blockData.data.startsWith(this.convertToHex(filename)))
                             {

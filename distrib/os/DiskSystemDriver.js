@@ -224,6 +224,11 @@ var TSOS;
             if (this.formatFlag === false) {
                 return null;
             }
+            if (filename.includes("process")) {
+                _StdOut.putText("You are unable to read a processes contents. See pointer to confirm contents");
+                _StdOut.advanceLine();
+                return null;
+            }
             else {
                 // locates the file's directory entry 
                 for (let t = 0; t <= this.trackMax; t++) {
