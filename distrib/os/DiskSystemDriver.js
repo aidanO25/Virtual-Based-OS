@@ -144,8 +144,12 @@ var TSOS;
                 return false;
             }
             // converts the data and filename into hex forat for storage on disk
-            const hexData = this.convertToHex(data);
+            // converts the filename to hex
             const filenameHex = this.convertToHex(filename);
+            // checks if the data is already in hex format (such as user input code) or if it needs a conversion
+            // I had chat help with this implementation because of the issue with saving the input from load program into the file system
+            const isHex = /^[0-9A-Fa-f\s]+$/.test(data.trim());
+            const hexData = isHex ? data.replace(/\s+/g, "").toUpperCase() : this.convertToHex(data);
             // locates the file's directory entry (no chat help this time, got the hang of it)
             for (let t = 0; t <= this.trackMax; t++) {
                 for (let s = 0; s <= this.sectorMax; s++) {

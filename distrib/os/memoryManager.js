@@ -36,6 +36,7 @@ var TSOS;
             }
             _StdOut.advanceLine();
         }
+        // oh i forgot to mention that i had chat help with this function
         convertProgramToHexString(program) {
             return program.map(byte => byte.toString(16).padStart(2, "0")).join("").toUpperCase();
         }
