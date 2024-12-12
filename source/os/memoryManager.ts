@@ -9,7 +9,7 @@ module TSOS {
         private memoryAccessor: MemoryAccessor;
         private nextPID: number; // to keep track of the next available PID
 
-        private processResidentList: PCB[]; // an array to store PCBs
+        public processResidentList: PCB[]; // an array to store PCBs
         public readyQueue: PCB[] = []; //processes that are ready to execute.
 
         private partitions: number = 3; // number of memory partitions (0, 1, 2)
@@ -141,6 +141,45 @@ module TSOS {
             this.availablePartitions.fill(true);
         
         }
+
+        //-----------------------------------------------------------------------
+        // the code below specifically deals with the disk
+        private extractProcessMemory(base: number, limit: number): string 
+        {
+            let memoryData = "";
+            for (let address = base; address <= limit; address++)
+            {
+                const byte = this.memoryAccessor.read(address);
+                memoryData += byte.toString(16).padStart(2, "0").toUpperCase();
+            }
+            return memoryData;
+        }
+
+        private loadProcessToMemory(pcb: PCB, baseAddress: number, programData: string): void
+        {
+            let memoryIndex = baseAddress;
+            for (let i = 0; i < programData.length; i += 2)
+            {
+                const byte = parseInt(programData.substring(i, i + 2), 16);
+                this.memoryAccessor.write(memoryIndex++, byte);
+            }
+            pcb.base = baseAddress;
+            pcb.limit = baseAddress + 256;
+            pcb.state = "ready";
+            this.availablePartitions[this.getPartitionIndex(baseAddress)] = false;
+        }
+
+        private getPartitionIndex(base: number): number
+        {
+            switch (base)
+            {
+                case 0: return 0;
+                case 256: return 1;
+                case 512: return 2;
+                default: return -1; // invalid partition
+            }
+        }
+        
 
     }
 }

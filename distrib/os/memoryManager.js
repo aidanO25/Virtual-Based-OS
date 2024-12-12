@@ -85,13 +85,6 @@ var TSOS;
             pcb.location = "memory";
             // Debugging output
             _StdOut.putText(`Program loaded into memory with PID ${pcb.PID}`);
-            /*
-            _StdOut.advanceLine();
-            _StdOut.putText(`processResidentList length: ${this.processResidentList.length}`);
-            _StdOut.advanceLine();
-            _StdOut.putText(`readyQueue length: ${this.readyQueue.length}`);
-            _StdOut.advanceLine();
-            */
             TSOS.Control.updatePcbDisplay();
             return pcb.PID; // returns the program's process ID
         }
@@ -114,6 +107,35 @@ var TSOS;
             this.processResidentList = []; // resets the PCBs array
             // marks all partitions as available
             this.availablePartitions.fill(true);
+        }
+        //-----------------------------------------------------------------------
+        // the code below specifically deals with the disk
+        extractProcessMemory(base, limit) {
+            let memoryData = "";
+            for (let address = base; address <= limit; address++) {
+                const byte = this.memoryAccessor.read(address);
+                memoryData += byte.toString(16).padStart(2, "0").toUpperCase();
+            }
+            return memoryData;
+        }
+        loadProcessToMemory(pcb, baseAddress, programData) {
+            let memoryIndex = baseAddress;
+            for (let i = 0; i < programData.length; i += 2) {
+                const byte = parseInt(programData.substring(i, i + 2), 16);
+                this.memoryAccessor.write(memoryIndex++, byte);
+            }
+            pcb.base = baseAddress;
+            pcb.limit = baseAddress + 256;
+            pcb.state = "ready";
+            this.availablePartitions[this.getPartitionIndex(baseAddress)] = false;
+        }
+        getPartitionIndex(base) {
+            switch (base) {
+                case 0: return 0;
+                case 256: return 1;
+                case 512: return 2;
+                default: return -1; // invalid partition
+            }
         }
     }
     TSOS.MemoryManager = MemoryManager;

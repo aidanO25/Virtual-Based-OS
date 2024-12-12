@@ -14,17 +14,13 @@ var TSOS;
         base; // base memory address
         limit; // end of memory address
         state; // process state 
-        // Process location (to be clear this is whether it is the
-        // first, second, or third process in the ready que). Not its location (memory or disk)
-        location;
+        location; // whether the process is on disk or not
         priority; // process priority 
         // for tracking process turnaround time (thank you for offering +10)
         arrivalTime; // the time a process is added to the ready que
         startTime = null; // when the process first gets the CPU  
         completionTime = null; // when the process completes
         cpuBurstTime = 0; // time incremented each cycle
-        // the following is to keep track of whether a process is in memory or swapped out
-        memOrDisk;
         constructor(pid, base, limit, priority = 0, location = "memory") {
             this.PID = pid;
             this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
@@ -40,7 +36,7 @@ var TSOS;
             // for turnaround and wait time caculation
             this.arrivalTime = Date.now();
             // keeping track where the process resides
-            this.memOrDisk = null;
+            this.location = null;
         }
     }
     TSOS.PCB = PCB;

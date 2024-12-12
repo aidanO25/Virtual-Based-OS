@@ -14,9 +14,7 @@ module TSOS {
         public base: number; // base memory address
         public limit: number; // end of memory address
         public state: string; // process state 
-        // Process location (to be clear this is whether it is the
-        // first, second, or third process in the ready que). Not its location (memory or disk)
-        public location: string; 
+        public location: string; // whether the process is on disk or not
         public priority: number; // process priority 
 
         // for tracking process turnaround time (thank you for offering +10)
@@ -24,9 +22,6 @@ module TSOS {
         public startTime: number | null = null; // when the process first gets the CPU  
         public completionTime: number | null = null; // when the process completes
         public cpuBurstTime: number = 0; // time incremented each cycle
-
-        // the following is to keep track of whether a process is in memory or swapped out
-        public memOrDisk: "memory" | "disk";
 
         constructor(pid: number, base: number, limit: number, priority: number = 0, location: "memory" | "disk" = "memory") 
         {
@@ -46,7 +41,7 @@ module TSOS {
             this.arrivalTime = Date.now();
 
             // keeping track where the process resides
-            this.memOrDisk = null;
+            this.location = null;
         }
     }
 
