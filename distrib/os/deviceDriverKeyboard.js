@@ -19,7 +19,7 @@ var TSOS;
         }
         krnKbdDriverEntry() {
             // Initialization routine for this, the kernel-mode Keyboard Device Driver.
-            this.status = "loaded";
+            this.status = "keyboard loaded";
             // More?
         }
         krnKbdDispatchKeyPress(params) {

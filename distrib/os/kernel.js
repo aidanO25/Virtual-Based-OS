@@ -13,6 +13,7 @@ var _MemoryAccessor;
 var _MemoryManager;
 var _Scheduler;
 var _CPU;
+var _krnDiskSystemDriver;
 var TSOS;
 (function (TSOS) {
     class Kernel {
@@ -46,6 +47,12 @@ var TSOS;
             _krnKeyboardDriver = new TSOS.DeviceDriverKeyboard(); // Construct it.
             _krnKeyboardDriver.driverEntry(); // Call the driverEntry() initialization routine.
             this.krnTrace(_krnKeyboardDriver.status);
+            // Load the Disk System Device Driver
+            // loads the disk system device driver
+            this.krnTrace("Loading the disk system device driver.");
+            _krnDiskSystemDriver = new TSOS.DiskSystemDriver(); // Construct it.
+            _krnDiskSystemDriver.driverEntry(); // Call the driverEntry() initialization routine.
+            this.krnTrace(_krnDiskSystemDriver.status); // logs the status
             //
             // ... more?
             //

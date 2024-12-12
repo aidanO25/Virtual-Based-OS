@@ -83,7 +83,6 @@ var TSOS;
         }
         // this allows the cpu to fetch, decond, and execute
         cycle() {
-            _Kernel.krnTrace('CPU cycle');
             // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
             if (this.memoryAccessor && this.isExecuting) {
                 this.pcb.state = "Running";
@@ -109,7 +108,8 @@ var TSOS;
                     _StdOut.putText(`Process ${this.pcb.PID} - Turnaround Time: ${turnaroundTime} ms, Wait Time: ${waitTime} ms`);
                     _StdOut.advanceLine();
                     /// checks if there are any more processes to execute
-                    if (this.schedulerFlag = true) {
+                    if (this.schedulerFlag === true) // YOU ACTUALLY HAVE TO BE KIDDING ME!!! i love that i have to use === instead of =. I should know this by now
+                     {
                         _Kernel.initiateContextSwitch();
                     }
                 }
@@ -119,7 +119,7 @@ var TSOS;
                 this.savePCB();
                 TSOS.Control.updatePcbDisplay(); // updates the PCB display
                 // increases the quantum counter
-                if (this.schedulerFlag === true) {
+                if (this.schedulerFlag) {
                     _Scheduler.manageQuantum();
                 }
                 // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)

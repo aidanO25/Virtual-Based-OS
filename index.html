@@ -24,6 +24,7 @@
    <script type="text/javascript" src="distrib/os/console.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriver.js"></script>
    <script type="text/javascript" src="distrib/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="distrib/os/DiskSystemDriver.js"></script> <!-- Disk system driver -->
    <script type="text/javascript" src="distrib/os/queue.js"></script>
    <script type="text/javascript" src="distrib/os/shell.js"></script>
    <script type="text/javascript" src="distrib/os/shellCommand.js"></script>
@@ -66,6 +67,7 @@
 <body onload="onDocumentLoad()">
 
 <div id="divMain" style="width:100%;">
+   
 
    <div id="divButtonBar" style="margin:4px;">
       <input type="button"
@@ -118,6 +120,7 @@
    <div id="statusBar" style="margin: 10px; padding: 10px; background-color: lightgrey; font-weight: bold;">
          Date: -- | Time: -- | Status: Content
    </div>
+   
 
    <div id="divConsole" style="margin:4px; width:500px; height:500px; float:left;">
       <canvas id="display"
@@ -153,6 +156,7 @@
          </div>
       </div>
    </div>
+   
 
 
    <!-- displays the cpu state (I accidnetally commited this to #12 instead of #13 just because of confusion of the requirement)--> 
@@ -210,6 +214,26 @@
           </table>
       </div>
   </div>
+
+  <!-- this is to display the disk system. is visible once formatted-->
+  <label>Disk System Display</label>
+  <div id="diskTableContainer">
+   <table id="diskTable">
+     <!-- header -->
+     <thead>
+       <tr>
+         <th>T:S:B</th>
+         <th>In Use</th>
+         <th>References (T:S:B)</th>
+         <th>Data</th>
+       </tr>
+     </thead>
+     <!-- body which is filled by the disk system initialization -->
+     <tbody>
+       <!-- Dynamically generated rows go here -->
+     </tbody>
+   </table>
+ </div>
 
 </div>
 

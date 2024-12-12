@@ -73,3 +73,39 @@ h3 {
 {
   background-color: #cce5ff; 
 }
+
+#diskTableContainer {
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 200px; /* Limit height */
+  margin-top: 10px; /* Add space above */
+  width: fit-content; /* Make the container fit the content width */
+  background-color: transparent;
+}
+
+/* I had chat help with this css becasue I was not going to bother spending time figuring 
+  out how the small changes needed to be made to display this properly. I can spend that time
+  working on the bulk of the work
+
+  I would also like to alter this a bit once the actual work is done to display the 
+  disk on the right side and increase the hight 
+  */
+#diskTable {
+  border-collapse: collapse; /* Ensure proper table borders */
+  background-color: white;
+  display: table; /* Makes the table dynamically sized based on content */
+}
+
+#diskTable th, #diskTable td {
+  font-size: 15px; 
+  border: 1px solid black;
+  padding: 5px;
+  text-align: center;
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+#diskTable th {
+  background-color: #f2f2f2;
+  position: sticky; /* Keep header visible while scrolling */
+  top: 0;
+}
+

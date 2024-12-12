@@ -49,40 +49,64 @@ var TSOS;
             sc = new TSOS.ShellCommand(this.shellDate, "date", "<string> - Displays the current date and time.");
             this.commandList[this.commandList.length] = sc;
             // location (assuming you don't actually want us to implement like an api to get a user's actual location)
-            sc = new TSOS.ShellCommand(this.shellLocation, "location", "Displays a user's current location (made up");
+            sc = new TSOS.ShellCommand(this.shellLocation, "location", "- Displays a user's current location (made up");
             this.commandList[this.commandList.length] = sc;
             // fun facts
-            sc = new TSOS.ShellCommand(this.shellFact, "fact", "Gives the user a fun fact");
+            sc = new TSOS.ShellCommand(this.shellFact, "fact", "- Gives the user a fun fact");
             this.commandList[this.commandList.length] = sc;
             // status message
             sc = new TSOS.ShellCommand(this.shellStatus, "status", "<string> - Updates the current status");
             this.commandList[this.commandList.length] = sc;
             // load (check if user input is valid assembly)
-            sc = new TSOS.ShellCommand(this.shellLoad, "load", "Validates the usercode in the HTML5 text area");
+            sc = new TSOS.ShellCommand(this.shellLoad, "load", "- Validates the usercode in the HTML5 text area");
             this.commandList[this.commandList.length] = sc;
             // runs a program in memory 
             sc = new TSOS.ShellCommand(this.shellRun, "run", "<pid> - Runs the program with the given Process ID (PID).");
             this.commandList[this.commandList.length] = sc;
             // bsod
-            sc = new TSOS.ShellCommand(this.shellbsod, "bsod", "Call at your own risk");
+            sc = new TSOS.ShellCommand(this.shellbsod, "bsod", "- Call at your own risk");
             this.commandList[this.commandList.length] = sc;
             // clear's all memory
-            sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", "clears all memory segments");
+            sc = new TSOS.ShellCommand(this.shellclearmem, "clearmem", "- clears all memory segments");
             this.commandList[this.commandList.length] = sc;
             // displays the pid and state of all processes
-            sc = new TSOS.ShellCommand(this.shellps, "ps", "displays the PID and state of all processes");
+            sc = new TSOS.ShellCommand(this.shellps, "ps", "- displays the PID and state of all processes");
             this.commandList[this.commandList.length] = sc;
             // kills a process
-            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> kills a process");
+            sc = new TSOS.ShellCommand(this.shellkill, "kill", "<pid> -  kills a process");
             this.commandList[this.commandList.length] = sc;
             // runs all processes within the ready queue
-            sc = new TSOS.ShellCommand(this.shellrunall, "runall", "runs all processes");
+            sc = new TSOS.ShellCommand(this.shellrunall, "runall", "- runs all processes");
             this.commandList[this.commandList.length] = sc;
             // set's the quantum
-            sc = new TSOS.ShellCommand(this.shellquantum, "quantum", "<int> lets the user set the Round Robin quantum");
+            sc = new TSOS.ShellCommand(this.shellquantum, "quantum", " <int> - lets the user set the Round Robin quantum");
             this.commandList[this.commandList.length] = sc;
             // kills all processes
-            sc = new TSOS.ShellCommand(this.shellkillall, "killall", "kills all processes");
+            sc = new TSOS.ShellCommand(this.shellkillall, "killall", "- kills all processes");
+            this.commandList[this.commandList.length] = sc;
+            // formats the disk
+            sc = new TSOS.ShellCommand(this.shellformat, "format", "- formats the disk system");
+            this.commandList[this.commandList.length] = sc;
+            // creates a file with the name included
+            sc = new TSOS.ShellCommand(this.shellCreate, "create", "<filename> - creates a file with the name included");
+            this.commandList[this.commandList.length] = sc;
+            // writes data to a file
+            sc = new TSOS.ShellCommand(this.shellWrite, "write", "<filename> <\"text\"> - writes the text to the filename");
+            this.commandList[this.commandList.length] = sc;
+            // reaads a file 
+            sc = new TSOS.ShellCommand(this.shellRead, "read", "<filename> - reads the contents of the file");
+            this.commandList[this.commandList.length] = sc;
+            // deletes a file 
+            sc = new TSOS.ShellCommand(this.shellDelete, "delete", "<filename> - deletes the named file");
+            this.commandList[this.commandList.length] = sc;
+            // renames a file 
+            sc = new TSOS.ShellCommand(this.shellRename, "rename", "<filename> - renames the file name provided");
+            this.commandList[this.commandList.length] = sc;
+            // lists all files on the disk
+            sc = new TSOS.ShellCommand(this.shellLs, "ls", "- lists al the files on the disk");
+            this.commandList[this.commandList.length] = sc;
+            // copies a file to a new filename
+            sc = new TSOS.ShellCommand(this.shellCopy, "copy", "<file to be coppied> <a new file name> - copies a file to another");
             this.commandList[this.commandList.length] = sc;
             // Display the initial prompt.
             this.putPrompt();
@@ -290,6 +314,25 @@ var TSOS;
                         _StdOut.putText("sets the quantum for Round Robin scheduling");
                     case "killall":
                         _StdOut.putText("kills all processes");
+                    case "format":
+                        _StdOut.putText("formats the disk system");
+                    case "create":
+                        _StdOut.putText("creates a file with the name provided");
+                    case "write":
+                        _StdOut.putText("writes text data to the filename");
+                    case "read":
+                        _StdOut.putText("reads file data");
+                    case "delete":
+                        _StdOut.putText("deletes the named file");
+                        break;
+                    case "rename":
+                        _StdOut.putText("renames a file");
+                        break;
+                    case "ls":
+                        _StdOut.putText("lists all files on disk");
+                        break;
+                    case "copy":
+                        _StdOut.putText("copies a file to a new filename");
                         break;
                     default:
                         _StdOut.putText("No manual entry for " + args[0] + ".");
@@ -378,7 +421,6 @@ var TSOS;
             }
         }
         // load method to load a program into memory
-        // load method to load a program into memory
         shellLoad() {
             const userInput = document.getElementById("taProgramInput").value.trim();
             let isValid = true;
@@ -439,23 +481,60 @@ var TSOS;
                 _DrawingContext.drawImage(bsodImage, 0, 0, _Canvas.width, _Canvas.height); // scales the image to size
             };
         }
+        /*
         // This is the shell command to run a program from memory per its PID
+        public shellRun(args: string[])
+        {
+            _CPU.setScheduler(false);
+            if (args.length > 0)
+            {
+                const pid = parseInt(args[0]);
+                // Fetch the PCB using the MemoryManager based on the input pid
+                const pcb = _MemoryManager.getPCB(pid);
+                // if true
+                if (pcb)
+                {
+                    // Load the PCB into the CPU
+                    _CPU.loadPCB(pcb)
+                    _CPU.isExecuting = true;
+                    _StdOut.putText(`Program with PID: ${pid} is now running.`);
+                }
+                else
+                {
+                    _StdOut.putText(`No program found with PID: ${pid}`);
+                }
+            }
+            else
+            {
+                _StdOut.putText("Usage: run <pid>");
+            }
+        }
+            */
         shellRun(args) {
             _CPU.setScheduler(false);
             if (args.length > 0) {
                 const pid = parseInt(args[0]);
                 // Fetch the PCB using the MemoryManager based on the input pid
                 const pcb = _MemoryManager.getPCB(pid);
-                // if true
-                if (pcb) {
-                    // Load the PCB into the CPU
-                    _CPU.loadPCB(pcb);
-                    _CPU.isExecuting = true;
-                    _StdOut.putText(`Program with PID: ${pid} is now running.`);
+                if (!pcb) {
+                    _StdOut.putText(`No process found with PID: ${pid}`);
+                    return;
                 }
-                else {
-                    _StdOut.putText(`No program found with PID: ${pid}`);
+                if (pcb.location === "disk") {
+                    // process is on the disk so it has to be swapped
+                    _StdOut.putText(`Swapping in process with PID ${pid} from disk.`);
+                    const swapSuccess = _MemoryManager.swapProcess(pcb);
+                    if (!swapSuccess) {
+                        _StdOut.putText("Failed to swap process into memory.");
+                        return;
+                    }
                 }
+                // process is now in memory so we can execute it
+                pcb.state = "running";
+                TSOS.Control.updatePcbDisplay();
+                _CPU.loadPCB(pcb);
+                _CPU.isExecuting = true;
+                _StdOut.putText(`Program with PID ${pid} is now running.`);
             }
             else {
                 _StdOut.putText("Usage: run <pid>");
@@ -464,8 +543,13 @@ var TSOS;
         // runs all programs within the resident list using round robin scheduling with a q of 6 or a user specified quantum
         shellrunall() {
             if (_MemoryManager.readyQueue.length > 0) {
-                _CPU.setScheduler(true);
-                _Kernel.initiateContextSwitch();
+                const pcb = _MemoryManager.getPCB(0);
+                if (pcb) {
+                    _CPU.loadPCB(pcb);
+                    _CPU.isExecuting = true;
+                    _CPU.setScheduler(true);
+                    _StdOut.putText("running all programs");
+                }
             }
             else {
                 _StdOut.putText("No programs loaded to run.");
@@ -516,6 +600,132 @@ var TSOS;
         // kills all processes through the kernel
         shellkillall() {
             _Kernel.terminateAllProcesses();
+        }
+        // formats the disk system
+        shellformat() {
+            try {
+                // calls the format method from the disk driver through the kernel
+                if (_krnDiskSystemDriver) {
+                    _krnDiskSystemDriver.format();
+                    _StdOut.putText("Disk formatted successfully.");
+                }
+                else {
+                    _StdOut.putText("Disk system is not initialized.");
+                }
+            }
+            catch (error) {
+                _StdOut.putText("An error occurred while formatting the disk: " + error.message);
+            }
+        }
+        // used by the disk driver to create a file 
+        shellCreate(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: create <filename>");
+                return;
+            }
+            const filename = args[0];
+            const result = _krnDiskSystemDriver.create(filename);
+            if (result) {
+                _StdOut.putText(`File '${filename}' created successfully.`);
+            }
+            else {
+                _StdOut.putText(`Failed to create file '${filename}'. `);
+                _StdOut.putText("Have you formatted the disk?d"); // ensures you format the disk
+            }
+        }
+        // allows us to write text data to the disk
+        shellWrite(args) {
+            if (args.length < 2) {
+                _StdOut.putText("Usage: write <filename> \"data\"");
+                return;
+            }
+            const filename = args[0];
+            const dataMatch = args.join(" ").match(/"(.+)"/);
+            if (!dataMatch || !dataMatch[1]) {
+                _StdOut.putText("Please include the data to write in quotes.");
+                return;
+            }
+            const data = dataMatch[1]; // Extract data between quotes
+            const success = _krnDiskSystemDriver.writeFile(filename, data);
+            if (success) {
+                _StdOut.putText(`Data written to file "${filename}".`);
+                _krnDiskSystemDriver.updateDiskDisplay(); // Update the display
+            }
+            else {
+                _StdOut.putText(`Failed to write data to file "${filename}".`);
+            }
+        }
+        // reads the contents of the provided file name
+        shellRead(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: read <filename>");
+                return null;
+            }
+            else {
+                const filename = args[0];
+                const fileContents = _krnDiskSystemDriver.readFile(filename);
+                if (fileContents) {
+                    _StdOut.putText(fileContents);
+                }
+                else {
+                    _StdOut.putText("Unable to read file contents");
+                }
+            }
+        }
+        // deletes the contents of the provided file name
+        shellDelete(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: delete <filename>");
+                return null;
+            }
+            else {
+                const filename = args[0];
+                _krnDiskSystemDriver.deleteFile(filename);
+            }
+        }
+        // lets a user rename a file
+        shellRename(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usage: rename <filename>");
+                return null;
+            }
+            else {
+                const filename = args[0];
+                const newName = args[1];
+                _krnDiskSystemDriver.renameFile(filename, newName);
+            }
+        }
+        // lists all the files on the disk
+        shellLs() {
+            const fileList = _krnDiskSystemDriver.listFiles();
+            if (fileList.length === 0) {
+                _StdOut.putText("No files found");
+                _StdOut.advanceLine();
+            }
+            else {
+                _StdOut.putText("Files on disk:");
+                _StdOut.advanceLine();
+                for (let i = 0; i < fileList.length; i++) {
+                    _StdOut.putText(fileList[i]);
+                    _StdOut.advanceLine();
+                }
+            }
+        }
+        // copys a file to a new file
+        shellCopy(args) {
+            if (args.length < 1) {
+                _StdOut.putText("Usge: copy <file to be coppied> <a new file name>");
+                return;
+            }
+            const originalFilename = args[0];
+            const newFilename = args[1];
+            const success = _krnDiskSystemDriver.copyFile(originalFilename, newFilename);
+            if (success) {
+                _StdOut.putText(`File "${originalFilename}" copied to "${newFilename}".`);
+            }
+            else {
+                _StdOut.putText(`Failed to copy file "${originalFilename}".`);
+            }
         }
     }
     TSOS.Shell = Shell;

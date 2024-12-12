@@ -91,8 +91,6 @@
             // this allows the cpu to fetch, decond, and execute
             public cycle(): void 
             {
-                _Kernel.krnTrace('CPU cycle');
-                
                 // checks if memory accessor is initialized. I just got rid of hte error handler as this is just way simpler
                 if (this.memoryAccessor && this.isExecuting) 
                 {
@@ -128,15 +126,13 @@
 
                         /// checks if there are any more processes to execute
                         
-                        if(this.schedulerFlag = true)
+                        if(this.schedulerFlag === true) // YOU ACTUALLY HAVE TO BE KIDDING ME!!! i love that i have to use === instead of =. I should know this by now
                         {
                             _Kernel.initiateContextSwitch();
                         }
                         
                     }
                     
-                        
-
                     TSOS.Control.updateCpuStatus(); // updating the cpu status in the ui after each cycle
                     TSOS.Control.updateMemoryDisplay(); // updates the memory status in the ui after each cycle
                     
@@ -146,12 +142,11 @@
                     TSOS.Control.updatePcbDisplay(); // updates the PCB display
 
                      // increases the quantum counter
-                    if(this.schedulerFlag === true)
+                    if(this.schedulerFlag)
                     {
                         _Scheduler.manageQuantum();
                     }
                     
-
                     // checks if single step mode has been activated (i may also have to change this but it may be because of my instruction set)
                     if (TSOS.Control.singleStepMode) 
                     {

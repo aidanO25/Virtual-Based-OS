@@ -14,14 +14,14 @@ var TSOS;
         base; // base memory address
         limit; // end of memory address
         state; // process state 
-        location; // process location
+        location; // whether the process is on disk or not
         priority; // process priority 
         // for tracking process turnaround time (thank you for offering +10)
         arrivalTime; // the time a process is added to the ready que
         startTime = null; // when the process first gets the CPU  
         completionTime = null; // when the process completes
         cpuBurstTime = 0; // time incremented each cycle
-        constructor(pid, base, limit, priority = 0) {
+        constructor(pid, base, limit, priority = 0, location = "memory") {
             this.PID = pid;
             this.PC = base; // (oh my god I forgot to change this to the base.... you wouldn't believe the headache)
             this.ACC = 0;
@@ -35,6 +35,8 @@ var TSOS;
             this.priority = priority; // Default priority is 0
             // for turnaround and wait time caculation
             this.arrivalTime = Date.now();
+            // keeping track where the process resides
+            this.location = null;
         }
     }
     TSOS.PCB = PCB;
