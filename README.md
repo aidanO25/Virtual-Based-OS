@@ -1,10 +1,12 @@
-****Feel free to grade main. If there is some trouble, then iproject4 branch is what I was working on. I merged it but you never know if there's a heisenbug**
+=================================================
+2024 Browser-based Operating System in TypeScript
+=================================================
 
 A few things to note:
 1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong. With that said, I am still able to execute instructions such as a9 
 01 ff. I can see it loads into the accumulator and when it's done the process terminates.
 2) Speaking of I am able to context switch using the kernel along with tracking process' and states.
-3) My swapper works to an extent. Feel free to check my commit messages for more on this. In short, I can run any process whether on the disk or not, when running all processes (4) it works until there is 1 or two left, in the case that there are 5 total it runs into some issues. Starting earlier on the project would have been in my best interst
+3) My swapper works to an extent. Feel free to check my commit messages for more on this. In short, I can run any process whether on the disk or not, when running all processes (4) it works until there is 1 or two left, in the case that there are 5 total it runs into some issues. Starting earlier on the project would have been in my best interest
 4) Lastly I was having trouble with enforcing memory bounds. I could do it with one process, but once there was more than once it always said there was an out-of-bounds at 236. There's more to this is my commit descriptions
 
 5) While my instruction set does struggle I have been using:
@@ -20,11 +22,9 @@ to test my project. While this isn't great, it gets the job done in order for me
 
 I'd love to work on this more in the future and really get this in tip-top shape because it was an enjoyable project even with all the headaches.
 
-=================================================
-2024 Browser-based Operating System in TypeScript
-=================================================
+---------------------------------------
 
-This is Alan's Operating Systems class initial project.
+This is taken from Alan's initial project for the Operating Systems class.
 See https://www.labouseur.com/courses/os/ for details.
 It was originally developed by Alan and then enhanced by Bob Nisco and Rebecca Murphy over the years.
 Fork this (or clone, but fork is probably better in case Alan changes anything about the initial project) into your own private repository. Or download it as a ZIP file. Then add Alan (userid *Labouseur*) as a collaborator.
