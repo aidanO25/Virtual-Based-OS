@@ -1,6 +1,4 @@
-=================================================
-2024 Browser-based Operating System in TypeScript
-=================================================
+# Browser-based Operating System in TypeScript
 
 A few things to note:
 1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong. With that said, I am still able to execute instructions such as a9 
@@ -58,15 +56,4 @@ Gulp will automatically:
 
 I find Gulp annoying, so consider use a compile script from the command line.
 
-A Few Notes
-===========
-
-**What's TypeScript?**
-TypeScript is a language that allows you to write in a statically-typed language that outputs standard JavaScript.
-It's all kinds of awesome.
-
-**Why should I use it?**
-This will be especially helpful for an OS or a Compiler that may need to run in the browser as you will have all of the great benefits of strong type checking and scope rules built right into your language.
-
-**Where can I get more info on TypeScript**
-[Right this way!](http://www.typescriptlang.org/)
+Lastly, open index.html, click start and play around
