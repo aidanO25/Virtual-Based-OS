@@ -1,7 +1,7 @@
 # Browser-based Operating System in TypeScript
 Navigate below to locate files to see examples of my programming practice:
-- source
-- host or os
+- source ->
+- host or os 
   
 A few things to note:
 1) My instruction set is still struggling, I believe either a. it has something to do with the synchronization of clock pulses or b. some instructions are just wrong. With that said, I am still able to execute instructions such as a9 
